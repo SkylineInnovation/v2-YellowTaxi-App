@@ -6,7 +6,7 @@ import {
   Alert,
 } from 'react-native';
 
-import { Screen, Button } from '../components/ui';
+import { Screen, Button, Logo } from '../components/ui';
 import { useAppDispatch, useAppSelector } from '../store';
 import { signOut } from '../store/slices/authSlice';
 import { colors, textStyles, spacing } from '../theme';
@@ -43,7 +43,7 @@ export const WelcomeScreen: React.FC = () => {
     <Screen>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.emoji}>🎉</Text>
+          <Logo size={100} />
           <Text style={styles.title}>Welcome to YellowTaxi!</Text>
           <Text style={styles.subtitle}>
             You have successfully authenticated with Firebase
@@ -140,8 +140,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['2xl'],
   },
   
-  emoji: {
-    fontSize: 64,
+  logoContainer: {
     marginBottom: spacing.lg,
   },
   

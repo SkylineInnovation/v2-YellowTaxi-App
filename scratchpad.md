@@ -85,6 +85,18 @@ implemented using the same Firebase project as the web application.
 
 ## 🎉 Firebase Phone Authentication Implementation COMPLETE!
 
+### Current Task: Update Mobile App Logo
+Replace emoji logo (🚕) with actual YellowTaxi logo from web app for consistent branding.
+
+**Progress:**
+- [x] Located logo file in web app: `/public/logo.svg`
+- [x] Analyzed logo structure (SVG with yellow taxi design)
+- [ ] Copy logo to React Native assets
+- [ ] Create Logo component for React Native
+- [ ] Update SplashScreen to use real logo
+- [ ] Update WelcomeScreen to use real logo
+- [ ] Test logo display on Android/iOS
+
 ## Implementation Plan
 1. Create TypeScript interfaces and types
 2. Set up navigation structure
