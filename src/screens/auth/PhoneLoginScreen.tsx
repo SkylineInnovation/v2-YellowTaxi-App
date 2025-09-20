@@ -32,6 +32,10 @@ interface Props {
 export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+962');
+
+  const handleCountryChange = (country: any) => {
+    setCountryCode(country.dialCode);
+  };
   
   const dispatch = useAppDispatch();
   const { phoneVerification } = useAppSelector((state) => state.auth);
@@ -48,8 +52,8 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
     }
 
     // Validate phone number
-    if (!phoneAuthService.validatePhoneNumber(phoneNumber)) {
-      Alert.alert('Error', 'Please enter a valid phone number');
+    if (!phoneAuthService.validatePhoneNumber(phoneNumber, countryCode)) {
+      Alert.alert('Error', 'Invalid phone number format. Please enter a valid phone number.');
       return;
     }
 
@@ -72,8 +76,8 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const isValidPhone = phoneNumber.trim().length > 0 && 
-    phoneAuthService.validatePhoneNumber(phoneNumber);
+  const isValidPhone = phoneNumber.trim().length > 0 &&
+    phoneAuthService.validatePhoneNumber(phoneNumber, countryCode);
 
   return (
     <Screen scrollable safeArea>
@@ -94,6 +98,7 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
             label="Phone Number"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
+            onChangeCountry={handleCountryChange}
             placeholder="Enter your phone number"
             defaultCountry="JO"
             autoFocus

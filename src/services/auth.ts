@@ -9,6 +9,13 @@ import {
   type ConfirmationResult,
   type UserCredential
 } from '../config/firebase';
+import {
+  validatePhoneNumber as validatePhone,
+  formatPhoneNumber as formatPhone,
+  formatDisplayPhoneNumber,
+  isValidPhoneForCountry,
+  extractDialCode
+} from '../utils/phoneValidation';
 
 // Firebase Auth implementation for React Native
 class FirebaseAuthService {
@@ -127,14 +134,19 @@ export class PhoneAuthService {
     return PhoneAuthService.instance;
   }
 
-  async sendOTP(phoneNumber: string): Promise<PhoneAuthResponse> {
+  async sendOTP(phoneNumber: string, dialCode: string = '+962'): Promise<PhoneAuthResponse> {
     try {
       if (!isFirebaseConfigured()) {
         throw new Error('Firebase is not properly configured. Please check your Firebase setup.');
       }
 
+      // Validate phone number first
+      if (!this.validatePhoneNumber(phoneNumber, dialCode)) {
+        throw new Error('Invalid phone number format. Please enter a valid phone number.');
+      }
+
       // Format phone number to E.164 format
-      const formattedPhone = this.formatPhoneNumber(phoneNumber);
+      const formattedPhone = this.formatPhoneNumber(phoneNumber, dialCode);
 
       console.log('Sending OTP to:', formattedPhone);
 
@@ -236,40 +248,19 @@ export class PhoneAuthService {
     return auth.onAuthStateChanged(callback);
   }
 
-  private formatPhoneNumber(phone: string): string {
-    // Remove all non-digit characters
-    const cleaned = phone.replace(/\D/g, '');
-
-    // Add Jordan country code if not present (default country)
-    if (!cleaned.startsWith('962')) {
-      return `+962${cleaned}`;
-    }
-
-    return `+${cleaned}`;
+  private formatPhoneNumber(phone: string, dialCode: string = '+962'): string {
+    // Use the comprehensive phone formatting utility
+    return formatPhone(phone, dialCode);
   }
 
-  validatePhoneNumber(phone: string): boolean {
-    // Remove all non-digit characters
-    const cleaned = phone.replace(/\D/g, '');
-
-    // Check if it's a valid Jordanian phone number (9 digits after country code)
-    if (cleaned.startsWith('962')) {
-      return cleaned.length === 12; // 962 + 9 digits
-    }
-
-    // For other countries, basic validation (at least 7 digits)
-    return cleaned.length >= 7 && cleaned.length <= 15;
+  validatePhoneNumber(phone: string, dialCode?: string): boolean {
+    // Use the comprehensive phone validation utility
+    return validatePhone(phone, dialCode);
   }
 
-  formatDisplayPhoneNumber(phone: string, countryCode: string = '+962'): string {
-    const cleaned = phone.replace(/\D/g, '');
-
-    if (countryCode === '+962' && cleaned.length === 9) {
-      // Format Jordanian numbers: XXX XXX XXX
-      return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
-    }
-
-    return phone;
+  formatDisplayPhoneNumber(phone: string, dialCode: string = '+962'): string {
+    // Use the comprehensive phone display formatting utility
+    return formatDisplayPhoneNumber(phone, dialCode);
   }
 
   // Additional utility methods for user management
