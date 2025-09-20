@@ -6,6 +6,7 @@ import {
   firebaseAuth,
   firebaseFirestore,
   isFirebaseConfigured,
+  FieldValue,
   type ConfirmationResult,
   type UserCredential
 } from '../config/firebase';
@@ -95,7 +96,7 @@ class FirebaseAuthService {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
-        updatedAt: firebaseFirestore.FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
         ...additionalData,
       };
 
@@ -106,7 +107,7 @@ class FirebaseAuthService {
         // Create new user document
         await userDocRef.set({
           ...userData,
-          createdAt: firebaseFirestore.FieldValue.serverTimestamp(),
+          createdAt: FieldValue.serverTimestamp(),
         });
         console.log('User document created');
       } else {
@@ -269,7 +270,7 @@ export class PhoneAuthService {
       const userDocRef = firebaseFirestore.collection('users').doc(uid);
       await userDocRef.update({
         ...profileData,
-        updatedAt: firebaseFirestore.FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
       console.log('User profile updated successfully');
     } catch (error) {

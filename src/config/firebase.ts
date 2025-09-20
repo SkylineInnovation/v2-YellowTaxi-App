@@ -9,6 +9,9 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 export const firebaseAuth = auth();
 export const firebaseFirestore = firestore();
 
+// Export FieldValue for serverTimestamp and other field operations
+export const FieldValue = firestore.FieldValue;
+
 // Export types for TypeScript
 export type User = FirebaseAuthTypes.User;
 export type UserCredential = FirebaseAuthTypes.UserCredential;
