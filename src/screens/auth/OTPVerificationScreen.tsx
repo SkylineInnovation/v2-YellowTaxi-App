@@ -87,9 +87,10 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
         confirmationResult,
       })).unwrap();
 
-      // Check if user needs to complete profile setup
-      // For now, navigate to role selection for new users
-      navigation.navigate('RoleSelection', { user });
+      // Authentication successful!
+      // The RootNavigator will automatically detect the authenticated state
+      // and navigate to the main app. No need to manually navigate here.
+      console.log('OTP verification successful, user authenticated:', user.uid);
     } catch (error) {
       Alert.alert(
         'Verification Failed',

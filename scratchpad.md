@@ -67,7 +67,17 @@ implemented using the same Firebase project as the web application.
 - Fixed Firestore document creation/update after OTP verification
 - Users can now complete full authentication flow without errors
 
-Ready for testing on real devices with complete authentication flow!
+#### Current Issue: Post-Authentication Navigation
+- Users get stuck on splash screen after successful OTP verification
+- PlaceholderMainApp component only shows SplashScreen (line 90 in RootNavigator.tsx)
+- Navigation expects complete user profile but OTP verification only creates basic user
+- Missing proper main app interface for authenticated users
+
+**Solution Plan:**
+1. Create proper welcome/main screen for authenticated users
+2. Update navigation logic to handle basic authenticated users
+3. Implement role selection flow or skip to main app
+4. Test complete authentication to main app flow
 
 ## Implementation Plan
 1. Create TypeScript interfaces and types

@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from './types';
 import { AuthNavigator } from './AuthNavigator';
 import { SplashScreen } from '../screens/SplashScreen';
+import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { useAppDispatch, useAppSelector } from '../store';
 import { setUser } from '../store/slices/authSlice';
 import { phoneAuthService } from '../services/auth';
@@ -59,9 +60,8 @@ export const RootNavigator: React.FC = () => {
         }}
       >
         {isAuthenticated && user ? (
-          // User is authenticated - show main app
-          // For now, we'll just show a placeholder since we haven't built the main app yet
-          <Stack.Screen name="App" component={PlaceholderMainApp} />
+          // User is authenticated - show welcome screen
+          <Stack.Screen name="App" component={WelcomeScreen} />
         ) : (
           // User is not authenticated - show auth flow
           <Stack.Screen name="Auth" component={AuthNavigator} />
@@ -71,22 +71,4 @@ export const RootNavigator: React.FC = () => {
   );
 };
 
-// Placeholder component for the main app
-// In a real implementation, this would be the main app navigator
-const PlaceholderMainApp: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
 
-  const handleSignOut = async () => {
-    try {
-      await phoneAuthService.signOut();
-      dispatch(setUser(null));
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
-  };
-
-  return (
-    <SplashScreen />
-  );
-};
