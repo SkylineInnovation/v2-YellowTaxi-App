@@ -10,7 +10,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
-import { Screen, Button, PhoneInput } from '../../components/ui';
+import { Screen, Button, PhoneInput, Logo } from '../../components/ui';
 import { AuthStackParamList } from '../../navigation/types';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { sendOTP, clearError } from '../../store/slices/authSlice';
@@ -86,7 +86,7 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>🚕</Text>
+          <Logo size={100} />
           <Text style={styles.title}>Welcome to YellowTaxi</Text>
           <Text style={styles.subtitle}>
             Enter your phone number to get started
@@ -143,7 +143,6 @@ const styles = StyleSheet.create({
   },
   
   logo: {
-    fontSize: 64,
     marginBottom: spacing.lg,
   },
   
