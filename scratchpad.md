@@ -134,6 +134,15 @@ The README now serves as a comprehensive guide for developers, covering all impl
 **Complete Professional Android Branding Achieved:**
 The Android app now displays the professional YellowTaxi logo in the app drawer and home screen, providing consistent branding across all platforms. Users will see the same professional logo from app launch to authentication screens.
 
+### App Display Name Update ✅
+- [x] Update Android app name in strings.xml from 'yellowtaxiapp' to 'YellowTaxi'
+- [x] Update iOS app display name in Info.plist from 'yellowtaxiapp' to 'YellowTaxi'
+- [x] Professional app name now appears under launcher icon on both platforms
+- [x] Test app build with updated display name
+
+**Complete Professional Mobile App Branding Achieved:**
+The mobile app now has complete professional branding with YellowTaxi logo AND name displayed under the launcher icon, providing a cohesive branded experience that matches the web application across all platforms.
+
 ## Implementation Plan
 1. Create TypeScript interfaces and types
 2. Set up navigation structure
