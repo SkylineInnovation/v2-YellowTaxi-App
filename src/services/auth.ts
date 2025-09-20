@@ -1,78 +1,129 @@
-// Firebase Auth Service
-// Note: This is a mock implementation for demonstration purposes
-// In a real app, you would import and configure Firebase Auth
+// Firebase Auth Service for React Native
+// Real Firebase implementation using @react-native-firebase
 
 import { User, PhoneAuthResponse, AuthResponse } from '../types/auth';
+import {
+  firebaseAuth,
+  firebaseFirestore,
+  isFirebaseConfigured,
+  FieldValue,
+  type ConfirmationResult,
+  type UserCredential
+} from '../config/firebase';
+import {
+  validatePhoneNumber as validatePhone,
+  formatPhoneNumber as formatPhone,
+  formatDisplayPhoneNumber,
+  isValidPhoneForCountry,
+  extractDialCode
+} from '../utils/phoneValidation';
 
-// Mock Firebase Auth types
-interface ConfirmationResult {
-  verificationId: string;
-  confirm: (verificationCode: string) => Promise<UserCredential>;
-}
-
-interface UserCredential {
-  user: User;
-}
-
-// Mock Firebase Auth implementation
-class MockFirebaseAuth {
+// Firebase Auth implementation for React Native
+class FirebaseAuthService {
   private currentUser: User | null = null;
-  private mockVerificationId: string | null = null;
 
   async signInWithPhoneNumber(phoneNumber: string): Promise<ConfirmationResult> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      if (!isFirebaseConfigured()) {
+        throw new Error('Firebase is not properly configured');
+      }
 
-    // Generate mock verification ID
-    this.mockVerificationId = `mock_verification_${Date.now()}`;
+      console.log(`Sending OTP to ${phoneNumber}...`);
 
-    console.log(`Mock OTP sent to ${phoneNumber}: 123456`);
+      // Use React Native Firebase phone authentication
+      // Note: This automatically handles SMS sending without reCAPTCHA
+      const confirmationResult = await firebaseAuth.signInWithPhoneNumber(phoneNumber);
 
-    return {
-      verificationId: this.mockVerificationId,
-      confirm: async (verificationCode: string) => {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (verificationCode === '123456') {
-          const user: User = {
-            uid: `user_${Date.now()}`,
-            phoneNumber,
-            displayName: null,
-            email: null,
-            photoURL: null,
-          };
-          
-          this.currentUser = user;
-          return { user };
-        } else {
-          throw new Error('Invalid verification code');
-        }
-      },
-    };
+      console.log('OTP sent successfully');
+      return confirmationResult;
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      throw error;
+    }
   }
 
   async signOut(): Promise<void> {
-    this.currentUser = null;
-    this.mockVerificationId = null;
+    try {
+      await firebaseAuth.signOut();
+      this.currentUser = null;
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
   }
 
   getCurrentUser(): User | null {
-    return this.currentUser;
+    const firebaseUser = firebaseAuth.currentUser;
+    if (firebaseUser) {
+      return {
+        uid: firebaseUser.uid,
+        phoneNumber: firebaseUser.phoneNumber,
+        displayName: firebaseUser.displayName,
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
+      };
+    }
+    return null;
   }
 
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    // Simulate auth state listener
-    callback(this.currentUser);
-    
-    // Return unsubscribe function
-    return () => {
-      // Cleanup listener
-    };
+    return firebaseAuth.onAuthStateChanged((firebaseUser) => {
+      if (firebaseUser) {
+        const user: User = {
+          uid: firebaseUser.uid,
+          phoneNumber: firebaseUser.phoneNumber,
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL,
+        };
+        this.currentUser = user;
+        callback(user);
+      } else {
+        this.currentUser = null;
+        callback(null);
+      }
+    });
+  }
+
+  // Create or update user document in Firestore
+  async createOrUpdateUserDocument(user: User, additionalData?: any): Promise<void> {
+    try {
+      const userDocRef = firebaseFirestore.collection('users').doc(user.uid);
+
+      const userData = {
+        uid: user.uid,
+        phoneNumber: user.phoneNumber,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        updatedAt: FieldValue.serverTimestamp(),
+        ...additionalData,
+      };
+
+      // Check if user document exists
+      const userDoc = await userDocRef.get();
+
+      if (!userDoc.exists) {
+        // Create new user document
+        await userDocRef.set({
+          ...userData,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+        console.log('User document created');
+      } else {
+        // Update existing user document
+        await userDocRef.update(userData);
+        console.log('User document updated');
+      }
+    } catch (error) {
+      console.error('Error creating/updating user document:', error);
+      throw error;
+    }
   }
 }
 
-// Create mock auth instance
-const auth = new MockFirebaseAuth();
+// Create Firebase auth instance
+const auth = new FirebaseAuthService();
 
 export class PhoneAuthService {
   private static instance: PhoneAuthService;
@@ -84,14 +135,23 @@ export class PhoneAuthService {
     return PhoneAuthService.instance;
   }
 
-  async sendOTP(phoneNumber: string): Promise<PhoneAuthResponse> {
+  async sendOTP(phoneNumber: string, dialCode: string = '+962'): Promise<PhoneAuthResponse> {
     try {
+      if (!isFirebaseConfigured()) {
+        throw new Error('Firebase is not properly configured. Please check your Firebase setup.');
+      }
+
+      // Validate phone number first
+      if (!this.validatePhoneNumber(phoneNumber, dialCode)) {
+        throw new Error('Invalid phone number format. Please enter a valid phone number.');
+      }
+
       // Format phone number to E.164 format
-      const formattedPhone = this.formatPhoneNumber(phoneNumber);
-      
+      const formattedPhone = this.formatPhoneNumber(phoneNumber, dialCode);
+
       console.log('Sending OTP to:', formattedPhone);
 
-      // Send OTP using mock Firebase Auth
+      // Send OTP using Firebase Auth
       const confirmationResult = await auth.signInWithPhoneNumber(formattedPhone);
 
       return {
@@ -100,9 +160,25 @@ export class PhoneAuthService {
       };
     } catch (error) {
       console.error('Send OTP error:', error);
+
+      let errorMessage = 'Failed to send OTP. Please try again.';
+
+      if (error instanceof Error) {
+        // Handle specific Firebase errors
+        if (error.message.includes('auth/invalid-phone-number')) {
+          errorMessage = 'Invalid phone number format. Please enter a valid phone number.';
+        } else if (error.message.includes('auth/too-many-requests')) {
+          errorMessage = 'Too many requests. Please try again later.';
+        } else if (error.message.includes('auth/quota-exceeded')) {
+          errorMessage = 'SMS quota exceeded. Please try again later.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to send OTP. Please try again.',
+        error: errorMessage,
       };
     }
   }
@@ -110,16 +186,48 @@ export class PhoneAuthService {
   async verifyOTP(confirmationResult: ConfirmationResult, otp: string): Promise<AuthResponse> {
     try {
       const result = await confirmationResult.confirm(otp);
-      
-      return {
-        success: true,
-        user: result.user,
-      };
+
+      // Create or update user document in Firestore
+      if (result.user) {
+        const user: User = {
+          uid: result.user.uid,
+          phoneNumber: result.user.phoneNumber,
+          displayName: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+        };
+
+        // Create/update user document
+        await auth.createOrUpdateUserDocument(user);
+
+        return {
+          success: true,
+          user,
+        };
+      } else {
+        throw new Error('Authentication failed - no user returned');
+      }
     } catch (error) {
       console.error('Verify OTP error:', error);
+
+      let errorMessage = 'Invalid OTP. Please check and try again.';
+
+      if (error instanceof Error) {
+        // Handle specific Firebase errors
+        if (error.message.includes('auth/invalid-verification-code')) {
+          errorMessage = 'Invalid verification code. Please check the code and try again.';
+        } else if (error.message.includes('auth/code-expired')) {
+          errorMessage = 'Verification code has expired. Please request a new code.';
+        } else if (error.message.includes('auth/session-expired')) {
+          errorMessage = 'Session has expired. Please start the verification process again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Invalid OTP. Please check and try again.',
+        error: errorMessage,
       };
     }
   }
@@ -141,40 +249,50 @@ export class PhoneAuthService {
     return auth.onAuthStateChanged(callback);
   }
 
-  private formatPhoneNumber(phone: string): string {
-    // Remove all non-digit characters
-    const cleaned = phone.replace(/\D/g, '');
-
-    // Add Jordan country code if not present
-    if (!cleaned.startsWith('962')) {
-      return `+962${cleaned}`;
-    }
-
-    return `+${cleaned}`;
+  private formatPhoneNumber(phone: string, dialCode: string = '+962'): string {
+    // Use the comprehensive phone formatting utility
+    return formatPhone(phone, dialCode);
   }
 
-  validatePhoneNumber(phone: string): boolean {
-    // Remove all non-digit characters
-    const cleaned = phone.replace(/\D/g, '');
-    
-    // Check if it's a valid Jordanian phone number (9 digits after country code)
-    if (cleaned.startsWith('962')) {
-      return cleaned.length === 12; // 962 + 9 digits
-    }
-    
-    // For other countries, basic validation (at least 7 digits)
-    return cleaned.length >= 7 && cleaned.length <= 15;
+  validatePhoneNumber(phone: string, dialCode?: string): boolean {
+    // Use the comprehensive phone validation utility
+    return validatePhone(phone, dialCode);
   }
 
-  formatDisplayPhoneNumber(phone: string, countryCode: string = '+962'): string {
-    const cleaned = phone.replace(/\D/g, '');
-    
-    if (countryCode === '+962' && cleaned.length === 9) {
-      // Format Jordanian numbers: XXX XXX XXX
-      return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
+  formatDisplayPhoneNumber(phone: string, dialCode: string = '+962'): string {
+    // Use the comprehensive phone display formatting utility
+    return formatDisplayPhoneNumber(phone, dialCode);
+  }
+
+  // Additional utility methods for user management
+  async updateUserProfile(uid: string, profileData: Partial<User>): Promise<void> {
+    try {
+      const userDocRef = firebaseFirestore.collection('users').doc(uid);
+      await userDocRef.update({
+        ...profileData,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('User profile updated successfully');
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
     }
-    
-    return phone;
+  }
+
+  async getUserProfile(uid: string): Promise<any> {
+    try {
+      const userDocRef = firebaseFirestore.collection('users').doc(uid);
+      const userDoc = await userDocRef.get();
+
+      if (userDoc.exists) {
+        return userDoc.data();
+      } else {
+        throw new Error('User profile not found');
+      }
+    } catch (error) {
+      console.error('Error getting user profile:', error);
+      throw error;
+    }
   }
 }
 

@@ -10,7 +10,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
-import { Screen, Button, OTPInput } from '../../components/ui';
+import { Screen, Button, OTPInput, Logo } from '../../components/ui';
 import { AuthStackParamList } from '../../navigation/types';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { verifyOTP, sendOTP, clearError } from '../../store/slices/authSlice';
@@ -87,9 +87,10 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
         confirmationResult,
       })).unwrap();
 
-      // Check if user needs to complete profile setup
-      // For now, navigate to role selection for new users
-      navigation.navigate('RoleSelection', { user });
+      // Authentication successful!
+      // The RootNavigator will automatically detect the authenticated state
+      // and navigate to the main app. No need to manually navigate here.
+      console.log('OTP verification successful, user authenticated:', user.uid);
     } catch (error) {
       Alert.alert(
         'Verification Failed',
@@ -145,7 +146,7 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.header}>
-          <Text style={styles.icon}>📱</Text>
+          <Logo size={80} />
           <Text style={styles.title}>Verify Phone Number</Text>
           <Text style={styles.subtitle}>
             Enter the 6-digit verification code sent to
@@ -216,7 +217,6 @@ const styles = StyleSheet.create({
   },
   
   icon: {
-    fontSize: 64,
     marginBottom: spacing.lg,
   },
   

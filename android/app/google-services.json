@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "926847755164",
+    "project_id": "yellowtaxi-rides",
+    "storage_bucket": "yellowtaxi-rides.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926847755164:android:bc7677ccd2366aed529e59",
+        "android_client_info": {
+          "package_name": "com.yellowtaxiapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "926847755164-280pckrbj8ganqg82of2k7vrft1c1b5a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV99Kd9kmI7p_E11HG_lC4vIKPvjqKZ_I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "926847755164-280pckrbj8ganqg82of2k7vrft1c1b5a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

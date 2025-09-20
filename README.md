@@ -1,97 +1,228 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🚕 YellowTaxi Mobile App
 
-# Getting Started
+A professional React Native mobile application for the YellowTaxi ride-hailing service, featuring Firebase phone authentication and consistent branding with the web application.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 📱 Features
 
-## Step 1: Start Metro
+- **🔐 Firebase Phone Authentication**: Secure phone number verification with OTP
+- **🎨 Professional Branding**: Consistent YellowTaxi logo across all screens
+- **📱 Cross-Platform**: Supports both Android and iOS
+- **🔥 Real-time Database**: Firestore integration for user data
+- **🚀 Modern UI**: Clean, responsive design with TypeScript
+- **📊 State Management**: Redux Toolkit for predictable state updates
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 🏗️ Tech Stack
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **Framework**: React Native 0.76.5
+- **Language**: TypeScript
+- **Authentication**: Firebase Auth (Phone)
+- **Database**: Cloud Firestore
+- **State Management**: Redux Toolkit
+- **Navigation**: React Navigation 6
+- **UI Components**: Custom component library
+- **Graphics**: React Native SVG for logo rendering
 
-```sh
-# Using npm
+## 🚀 Getting Started
+
+> **Note**: Make sure you have completed the [React Native Environment Setup](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+
+### Prerequisites
+
+1. **Node.js**: Version 18 or higher
+2. **React Native CLI**: `npm install -g @react-native-community/cli`
+3. **Android Studio**: For Android development
+4. **Xcode**: For iOS development (macOS only)
+5. **Firebase Project**: Set up with Authentication and Firestore enabled
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/SkylineInnovation/v2-YellowTaxi-App.git
+   cd v2-YellowTaxi-App
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **iOS Setup** (macOS only):
+   ```bash
+   cd ios && pod install && cd ..
+   ```
+
+4. **Firebase Configuration**:
+   - Place your `google-services.json` in `android/app/`
+   - Place your `GoogleService-Info.plist` in `ios/YellowTaxiApp/`
+
+## 🏃‍♂️ Running the App
+
+### Start Metro Server
+
+```bash
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
+### Build and Run
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+#### Android
+```bash
+npx react-native run-android
+```
+
+#### iOS
+```bash
+npx react-native run-ios
+```
+
+## 🔐 Authentication Flow
+
+The app implements Firebase phone authentication with the following flow:
+
+1. **Phone Login**: Enter phone number (supports US and international formats)
+2. **OTP Verification**: Enter 6-digit verification code sent via SMS
+3. **User Creation**: Automatic user document creation in Firestore
+4. **Welcome Screen**: Personalized welcome with user information
+
+### Test Credentials
+
+For development and testing:
+- **Phone Number**: `3333333333` (US format)
+- **OTP Code**: `123456`
+
+## 🎨 App Screens
+
+### Authentication Screens
+- **📱 Phone Login**: Professional YellowTaxi branding with phone input
+- **🔐 OTP Verification**: Code verification with resend functionality
+- **🎉 Welcome Screen**: Post-authentication welcome with user info
+
+### Core Screens
+- **🚀 Splash Screen**: App launch with YellowTaxi logo
+- **🏠 Main App**: Placeholder for future ride-booking features
+
+## 📁 Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # Core UI components (Button, Input, Logo, etc.)
+│   └── forms/          # Form-specific components
+├── screens/            # App screens
+│   ├── auth/           # Authentication screens
+│   └── main/           # Main app screens
+├── navigation/         # Navigation configuration
+├── services/           # External services (Firebase, API)
+├── store/              # Redux store and slices
+├── theme/              # Design system (colors, typography, spacing)
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions
+```
+
+## 🔧 Development
+
+### Hot Reload
+The app supports Fast Refresh for instant updates during development:
+- **Android**: Press <kbd>R</kbd> twice or <kbd>Ctrl</kbd> + <kbd>M</kbd> for dev menu
+- **iOS**: Press <kbd>R</kbd> in simulator or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> for dev menu
+
+### Key Components
+
+#### Logo Component
+```typescript
+import { Logo } from '../components/ui';
+
+// Default usage
+<Logo />
+
+// Custom size and color
+<Logo size={120} color="#FFFFFF" />
+```
+
+#### Authentication Components
+- `PhoneInput`: International phone number input with validation
+- `OTPInput`: 6-digit OTP verification input
+- `Button`: Customizable button with loading states
+
+## 🧪 Testing
+
+### Manual Testing Flow
+1. Launch app → Splash screen with YellowTaxi logo
+2. Enter phone: `3333333333`
+3. Enter OTP: `123456`
+4. Verify welcome screen displays user information
+5. Test sign out functionality
+
+### Firebase Test Configuration
+- Uses Firebase Auth test phone numbers
+- Firestore rules configured for development
+- Real-time user document creation and updates
+
+## 🚀 Deployment
 
 ### Android
+1. Generate signed APK:
+   ```bash
+   cd android && ./gradlew assembleRelease
+   ```
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
+2. Upload to Google Play Console
 
 ### iOS
+1. Archive in Xcode
+2. Upload to App Store Connect
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 📚 Documentation
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Comprehensive documentation is available in the `docs/` folder:
 
-```sh
-bundle install
-```
+- [`FIREBASE_AUTHENTICATION_COMPLETE.md`](docs/FIREBASE_AUTHENTICATION_COMPLETE.md) - Firebase setup and implementation
+- [`LOGO_IMPLEMENTATION.md`](docs/LOGO_IMPLEMENTATION.md) - Logo integration and branding
+- [`FIRESTORE_SERVERTIMESTAMP_FIX.md`](docs/FIRESTORE_SERVERTIMESTAMP_FIX.md) - Firestore timestamp handling
+- [`PHONE_VALIDATION_FIX.md`](docs/PHONE_VALIDATION_FIX.md) - Phone number validation
 
-Then, and every time you update your native dependencies, run:
+## 🤝 Contributing
 
-```sh
-bundle exec pod install
-```
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## 📄 License
 
-```sh
-# Using npm
-npm run ios
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-# OR using Yarn
-yarn ios
-```
+## 🆘 Troubleshooting
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Common Issues
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+**Build Failures:**
+- Clean and rebuild: `npx react-native clean && npm install`
+- Reset Metro cache: `npx react-native start --reset-cache`
 
-## Step 3: Modify your app
+**Firebase Issues:**
+- Verify `google-services.json` and `GoogleService-Info.plist` are correctly placed
+- Check Firebase project configuration and enabled services
 
-Now that you have successfully run the app, let's make changes!
+**Logo Display Issues:**
+- Ensure `react-native-svg` is properly installed
+- Run `cd ios && pod install` after installing SVG dependencies
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Getting Help
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- Check the [React Native Troubleshooting Guide](https://reactnative.dev/docs/troubleshooting)
+- Review Firebase documentation for authentication setup
+- Open an issue in the repository for project-specific problems
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 🔗 Links
 
-## Congratulations! :tada:
+- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Redux Toolkit Documentation](https://redux-toolkit.js.org/)
+- [React Navigation Documentation](https://reactnavigation.org/)
 
-You've successfully run and modified your React Native App. :partying_face:
+---
 
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**🚕 Built with ❤️ for the YellowTaxi platform**

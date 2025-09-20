@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { Screen } from '../components/ui';
+import { Screen, Logo } from '../components/ui';
 import { colors, textStyles, spacing } from '../theme';
 
 export const SplashScreen: React.FC = () => {
@@ -8,7 +8,7 @@ export const SplashScreen: React.FC = () => {
     <Screen safeArea={false} backgroundColor={colors.primary[500]}>
       <View style={styles.container}>
         <View style={styles.content}>
-          <Text style={styles.logo}>🚕</Text>
+          <Logo size={120} color={colors.white} />
           <Text style={styles.title}>YellowTaxi</Text>
           <Text style={styles.subtitle}>Your ride, your way</Text>
         </View>
@@ -37,7 +37,6 @@ const styles = StyleSheet.create({
   },
   
   logo: {
-    fontSize: 80,
     marginBottom: spacing.lg,
   },
   
