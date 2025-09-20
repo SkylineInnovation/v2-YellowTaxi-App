@@ -52,14 +52,22 @@ Replace the mock Firebase authentication with real Firebase phone authentication
 The React Native mobile app now has real Firebase phone authentication
 implemented using the same Firebase project as the web application.
 
-### Recent Fix: Phone Number Validation ✅
+### Recent Fixes ✅
+
+#### Phone Number Validation Fix:
 - Fixed US phone number validation issue (+1 3333333333 now works)
 - Implemented comprehensive phone validation utility matching web app
 - Added support for international formats and country-specific patterns
 - Updated auth service to handle country codes properly
 - Mobile app now accepts same test numbers as web application
 
-Ready for testing on real devices with proper phone validation!
+#### Firestore serverTimestamp Fix:
+- Fixed "Cannot read property 'serverTimestamp' of undefined" error
+- Corrected FieldValue import and usage in React Native Firebase
+- Fixed Firestore document creation/update after OTP verification
+- Users can now complete full authentication flow without errors
+
+Ready for testing on real devices with complete authentication flow!
 
 ## Implementation Plan
 1. Create TypeScript interfaces and types
