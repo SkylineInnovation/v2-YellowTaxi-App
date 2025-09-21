@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { combineReducers } from '@reduxjs/toolkit';
 
 import authReducer from './slices/authSlice';
+import rideReducer from './slices/rideSlice';
 
 // Persist config
 const persistConfig = {
@@ -15,6 +16,7 @@ const persistConfig = {
 // Root reducer
 const rootReducer = combineReducers({
   auth: authReducer,
+  ride: rideReducer,
 });
 
 // Persisted reducer

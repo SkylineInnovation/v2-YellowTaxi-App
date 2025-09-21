@@ -27,6 +27,8 @@ export type AppStackParamList = {
 // Customer Tab Navigator
 export type CustomerTabParamList = {
   RideBooking: undefined;
+  BookRide: undefined;
+  RideTracking: undefined;
   RideHistory: undefined;
   Profile: undefined;
 };
