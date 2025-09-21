@@ -215,6 +215,37 @@ The YellowTaxi mobile app now provides a professional, engaging post-authenticat
 - [x] Firebase: Production configuration in place
 - [x] Documentation: Complete setup and deployment guides available
 
+## Current Issue: Firestore Index Error
+**Error**: "Error subscribing to ride requests: Error: [firestore/failed-precondition] The query requires an index."
+
+**Analysis**:
+- The error occurs in rideService.ts at line 207:24
+- Query combines `where('customerId', '==', customerId)` with `orderBy('createdAt', 'desc')`
+- Firestore requires a composite index for queries with where + orderBy on different fields
+
+**Solution Plan**:
+- [x] Create firestore.indexes.json configuration file
+- [x] Define composite index for ride-requests collection
+- [x] Create firebase.json for project configuration
+- [x] Create firestore.rules for security rules
+- [x] Open Firebase Console to create the index
+- [ ] Deploy index to Firebase console or use Firebase CLI
+- [ ] Test the fix by running the app
+
+**Files Created**:
+- `firestore.indexes.json` - Defines composite indexes for ride-requests and orders collections
+- `firebase.json` - Firebase project configuration
+- `firestore.rules` - Security rules for Firestore collections
+
+**Next Steps**:
+1. **Firebase Console** (EASIEST): The browser has opened to the exact URL to create the index. Click "Create Index" button.
+2. **Firebase CLI** (ALTERNATIVE): Run `firebase deploy --only firestore:indexes` if you have Firebase CLI installed.
+
+**Index Details**:
+- **Collection**: ride-requests
+- **Fields**: customerId (ASC) + createdAt (DESC)
+- **Purpose**: Enables queries that filter by customerId and order by createdAt
+
 ## Lessons
 - Always check for existing scratchpad before starting new tasks
 - Use the scratchpad to track progress and organize thoughts
@@ -222,3 +253,4 @@ The YellowTaxi mobile app now provides a professional, engaging post-authenticat
 - Firebase React Native integration requires platform-specific configuration files
 - Professional branding consistency across all screens improves user experience
 - Comprehensive documentation is essential for project maintainability
+- Firestore composite queries (where + orderBy on different fields) require explicit index creation

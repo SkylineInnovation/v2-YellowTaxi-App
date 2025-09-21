@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Ride requests - users can read/write their own requests
+    match /ride-requests/{requestId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.customerId || 
+         request.auth.uid == resource.data.driverId);
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.customerId;
+    }
+    
+    // Orders - users can read/write their own orders
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.customer.id || 
+         request.auth.uid == resource.data.driver.id);
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.customer.id;
+    }
+    
+    // Drivers collection - for driver profiles
+    match /drivers/{driverId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == driverId;
+    }
+  }
+}
