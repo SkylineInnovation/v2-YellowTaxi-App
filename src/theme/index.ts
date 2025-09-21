@@ -19,4 +19,4 @@ export const theme = {
 };
 
 export type AppTheme = typeof theme;
-export { Theme };
+export type { Theme };

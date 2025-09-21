@@ -145,7 +145,7 @@ const authSlice = createSlice({
       })
       .addCase(verifyOTP.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.user = action.payload || null;
         state.isAuthenticated = true;
         state.error = null;
         // Clear phone verification state after successful verification

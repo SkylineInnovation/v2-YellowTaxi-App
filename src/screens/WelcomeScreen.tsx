@@ -16,7 +16,11 @@ import { colors, textStyles, spacing } from '../theme';
 
 const { width } = Dimensions.get('window');
 
-export const WelcomeScreen: React.FC = () => {
+interface WelcomeScreenProps {
+  navigation?: any;
+}
+
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
@@ -68,11 +72,15 @@ export const WelcomeScreen: React.FC = () => {
   };
 
   const handleFeaturePress = (feature: string) => {
-    Alert.alert(
-      'Coming Soon',
-      `${feature} feature will be available in the next update!`,
-      [{ text: 'OK' }]
-    );
+    if (feature === 'Book a Ride' && navigation) {
+      navigation.navigate('BookRide');
+    } else {
+      Alert.alert(
+        'Coming Soon',
+        `${feature} feature will be available in the next update!`,
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   return (

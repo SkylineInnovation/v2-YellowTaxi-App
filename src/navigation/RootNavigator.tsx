@@ -4,8 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { RootStackParamList } from './types';
 import { AuthNavigator } from './AuthNavigator';
+import { CustomerApp } from '../components/CustomerApp';
 import { SplashScreen } from '../screens/SplashScreen';
-import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { useAppDispatch, useAppSelector } from '../store';
 import { setUser } from '../store/slices/authSlice';
 import { phoneAuthService } from '../services/auth';
@@ -61,7 +61,7 @@ export const RootNavigator: React.FC = () => {
       >
         {isAuthenticated && user ? (
           // User is authenticated - show welcome screen
-          <Stack.Screen name="App" component={WelcomeScreen} />
+          <Stack.Screen name="App" component={CustomerApp} />
         ) : (
           // User is not authenticated - show auth flow
           <Stack.Screen name="Auth" component={AuthNavigator} />

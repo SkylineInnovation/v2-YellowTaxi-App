@@ -57,10 +57,11 @@ class FirebaseAuthService {
     if (firebaseUser) {
       return {
         uid: firebaseUser.uid,
-        phoneNumber: firebaseUser.phoneNumber,
-        displayName: firebaseUser.displayName,
-        email: firebaseUser.email,
-        photoURL: firebaseUser.photoURL,
+        id: firebaseUser.uid,
+        phoneNumber: firebaseUser.phoneNumber || '',
+        displayName: firebaseUser.displayName || undefined,
+        email: firebaseUser.email || undefined,
+        photoURL: firebaseUser.photoURL || undefined,
       };
     }
     return null;
@@ -71,10 +72,11 @@ class FirebaseAuthService {
       if (firebaseUser) {
         const user: User = {
           uid: firebaseUser.uid,
-          phoneNumber: firebaseUser.phoneNumber,
-          displayName: firebaseUser.displayName,
-          email: firebaseUser.email,
-          photoURL: firebaseUser.photoURL,
+          id: firebaseUser.uid,
+          phoneNumber: firebaseUser.phoneNumber || '',
+          displayName: firebaseUser.displayName || undefined,
+          email: firebaseUser.email || undefined,
+          photoURL: firebaseUser.photoURL || undefined,
         };
         this.currentUser = user;
         callback(user);
@@ -188,13 +190,14 @@ export class PhoneAuthService {
       const result = await confirmationResult.confirm(otp);
 
       // Create or update user document in Firestore
-      if (result.user) {
+      if (result?.user) {
         const user: User = {
           uid: result.user.uid,
-          phoneNumber: result.user.phoneNumber,
-          displayName: result.user.displayName,
-          email: result.user.email,
-          photoURL: result.user.photoURL,
+          id: result.user.uid,
+          phoneNumber: result.user.phoneNumber || '',
+          displayName: result.user.displayName || undefined,
+          email: result.user.email || undefined,
+          photoURL: result.user.photoURL || undefined,
         };
 
         // Create/update user document
@@ -284,7 +287,7 @@ export class PhoneAuthService {
       const userDocRef = firebaseFirestore.collection('users').doc(uid);
       const userDoc = await userDocRef.get();
 
-      if (userDoc.exists) {
+      if (userDoc.exists()) {
         return userDoc.data();
       } else {
         throw new Error('User profile not found');

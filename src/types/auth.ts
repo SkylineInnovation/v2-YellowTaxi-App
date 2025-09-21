@@ -1,6 +1,7 @@
 // Authentication related types
 export interface User {
   uid: string;
+  id: string; // Same as uid, for consistency with ride service
   phoneNumber: string;
   email?: string;
   displayName?: string;
