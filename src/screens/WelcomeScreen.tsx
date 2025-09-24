@@ -124,9 +124,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       >
         {/* Header with Background Image */}
         <ImageBackground
-          source={{
-            uri: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80'
-          }}
+          source={require('../assets/images/yellowtaxi-background-pro.jpg')}
           style={styles.headerBackground}
           imageStyle={styles.headerBackgroundImage}
         >
@@ -139,14 +137,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                 <TouchableOpacity style={styles.headerArrow}>
                   <Text style={styles.headerArrowText}>→</Text>
                 </TouchableOpacity>
-              </View>
-            </View>
-            <View style={styles.headerCards}>
-              <View style={styles.cardIcon}>
-                <Text style={styles.cardIconText}>💳</Text>
-              </View>
-              <View style={styles.cardIcon}>
-                <Text style={styles.cardIconText}>💳</Text>
               </View>
             </View>
           </View>
@@ -313,24 +303,6 @@ const styles = StyleSheet.create({
   headerArrowText: {
     color: colors.white,
     fontSize: 14,
-  },
-
-  headerCards: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-
-  cardIcon: {
-    width: 40,
-    height: 25,
-    backgroundColor: colors.primary[500],
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cardIconText: {
-    fontSize: 12,
   },
 
   // Search Section
