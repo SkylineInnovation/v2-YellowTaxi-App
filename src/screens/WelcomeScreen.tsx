@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  ImageBackground,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 
 import { Screen, Button, Logo, ServiceIcon, SearchBar } from '../components/ui';
@@ -23,38 +26,34 @@ interface ServiceItem {
   icon?: string;
   imageSource?: any;
   title: string;
-  description: string;
+  description?: string;
   route?: string;
   comingSoon?: boolean;
 }
 
 const services: ServiceItem[] = [
   {
-    id: 'ride-order',
+    id: 'transport',
     imageSource: require('../assets/images/yellowtax-icon.png'),
-    title: 'Ride Order',
-    description: 'Book a taxi ride',
+    title: 'Transport',
     route: 'BookRide',
   },
   {
-    id: 'food-order',
+    id: 'food',
     imageSource: require('../assets/images/food-icon.png'),
-    title: 'Food Order',
-    description: 'Order food delivery',
+    title: 'Food',
     comingSoon: true,
   },
   {
-    id: 'yellowtaxi-card',
+    id: 'mart',
     imageSource: require('../assets/images/credit-card-icon.png'),
-    title: 'YellowTaxi Card',
-    description: 'Manage your card',
+    title: 'Mart',
     comingSoon: true,
   },
   {
-    id: 'become-driver',
+    id: 'express',
     imageSource: require('../assets/images/taxi-driver.png'),
-    title: 'Become Driver',
-    description: 'Start earning',
+    title: 'Express',
     comingSoon: true,
   },
 ];
@@ -94,25 +93,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     );
   };
 
-  const formatPhoneNumber = (phoneNumber: string | null) => {
-    if (!phoneNumber) return 'Unknown';
-
-    // Format phone number for display
-    if (phoneNumber.startsWith('+1') && phoneNumber.length === 12) {
-      // US format: +1 (XXX) XXX-XXXX
-      const digits = phoneNumber.slice(2);
-      return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    }
-
-    return phoneNumber;
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  };
 
   const handleServicePress = (service: ServiceItem) => {
     if (service.route && navigation) {
@@ -135,178 +115,456 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <Screen>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <ScrollView
-        style={styles.container}
+        style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Header with Background Image */}
+        <ImageBackground
+          source={{
+            uri: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80'
+          }}
+          style={styles.headerBackground}
+          imageStyle={styles.headerBackgroundImage}
+        >
+          <View style={styles.headerOverlay}>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>Explore over 1,000</Text>
+              <Text style={styles.headerTitle}>rides worldwide</Text>
+              <View style={styles.headerSubtitleContainer}>
+                <Text style={styles.headerSubtitle}>Exclusively with YellowTaxi Cards</Text>
+                <TouchableOpacity style={styles.headerArrow}>
+                  <Text style={styles.headerArrowText}>→</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.headerCards}>
+              <View style={styles.cardIcon}>
+                <Text style={styles.cardIconText}>💳</Text>
+              </View>
+              <View style={styles.cardIcon}>
+                <Text style={styles.cardIconText}>💳</Text>
+              </View>
+            </View>
+          </View>
+        </ImageBackground>
+
         {/* Search Bar */}
-        <SearchBar
-          placeholder="Where to?"
-          onSearchPress={handleSearchPress}
-          style={styles.searchBar}
-        />
+        <View style={styles.searchContainer}>
+          <TouchableOpacity style={styles.searchBar} onPress={handleSearchPress}>
+            <View style={styles.searchIcon}>
+              <Text style={styles.searchIconText}>🔍</Text>
+            </View>
+            <Text style={styles.searchText}>Search the YellowTaxi</Text>
+            <TouchableOpacity style={styles.qrIcon}>
+              <Text style={styles.qrIconText}>⚏</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
 
-        {/* Welcome Greeting */}
-        <Text style={styles.welcomeGreeting}>
-          {getGreeting()}, {user?.phoneNumber ? 'Welcome back!' : 'Welcome!'}
-        </Text>
-
-        {/* Services Grid */}
-        <View style={styles.servicesSection}>
-          <Text style={styles.sectionTitle}>Our Services</Text>
-          <View style={styles.servicesGrid}>
+        {/* Services Row */}
+        <View style={styles.servicesContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.servicesRow}>
             {services.map((service) => (
-              <ServiceIcon
+              <TouchableOpacity
                 key={service.id}
-                icon={service.icon}
-                imageSource={service.imageSource}
-                title={service.title}
-                description={service.description}
-                onPress={() => handleServicePress(service)}
                 style={styles.serviceItem}
-              />
+                onPress={() => handleServicePress(service)}
+              >
+                <View style={styles.serviceIconContainer}>
+                  <Image source={service.imageSource} style={styles.serviceIcon} resizeMode="contain" />
+                </View>
+                <Text style={styles.serviceTitle}>{service.title}</Text>
+              </TouchableOpacity>
             ))}
+          </ScrollView>
+        </View>
+
+        {/* Balance Section */}
+        <View style={styles.balanceSection}>
+          <View style={styles.balanceItem}>
+            <Text style={styles.balanceLabel}>Balance</Text>
+            <View style={styles.balanceValueContainer}>
+              <Text style={styles.balanceValue}>$$ 0.00</Text>
+              <View style={styles.balanceIcon}>
+                <Text style={styles.balanceIconText}>$</Text>
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.balanceItem}>
+            <Text style={styles.balanceLabel}>Ride to</Text>
+            <Text style={styles.balanceLabel}>Home</Text>
+            <View style={styles.balanceValueContainer}>
+              <View style={styles.homeIcon}>
+                <Text style={styles.homeIconText}>🏠</Text>
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.balanceItem}>
+            <Text style={styles.balanceLabel}>Use Points</Text>
+            <Text style={styles.balanceValue}>4,291</Text>
           </View>
         </View>
+
+        {/* Apply Now Section */}
+        <TouchableOpacity style={styles.applyNowContainer}>
+          <Text style={styles.applyNowText}>Apply now</Text>
+          <Text style={styles.applyNowArrow}>→</Text>
+        </TouchableOpacity>
 
         {/* YellowTaxi Card Promotional Banner */}
-        <View style={styles.promoSection}>
-          <Text style={styles.promoHeadline}>
-            Apply for YellowTaxi Card and Get Discount
-          </Text>
-          <Image
+        <View style={styles.promoCard}>
+          <ImageBackground
             source={require('../assets/images/big-yellowtaxi-card.png')}
-            style={styles.promoImage}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.successBadge}>
-            <Text style={styles.successIcon}>✓</Text>
-            <Text style={styles.successText}>Authentication Successful</Text>
-          </View>
-
-          <Button
-            title="Sign Out"
-            variant="outline"
-            onPress={handleSignOut}
-            fullWidth
-            testID="sign-out-button"
-          />
+            style={styles.promoBackground}
+            imageStyle={styles.promoBackgroundImage}
+          >
+            <View style={styles.promoOverlay}>
+              <Text style={styles.promoTitle}>limitless enjoyment</Text>
+              <Text style={styles.promoSubtitle}>with the highest-limits in the card</Text>
+              <View style={styles.promoCardImage}>
+                <Text style={styles.promoCardText}>YellowTaxi PRIVI Miles Card</Text>
+              </View>
+            </View>
+          </ImageBackground>
+          <Text style={styles.promoFooter}>Enjoy over 44,000 miles when you sign up</Text>
+          <Text style={styles.promoSponsor}>Sponsored by YellowTaxi PRIVI Miles Card</Text>
         </View>
       </ScrollView>
-    </Screen>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.gray[50],
+  },
+
+  scrollContainer: {
+    flex: 1,
   },
 
   scrollContent: {
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl,
   },
 
-  // Search Bar
-  searchBar: {
-    marginBottom: spacing.lg,
+  // Header Section
+  headerBackground: {
+    height: 180,
+    marginBottom: -20,
   },
 
-  // Welcome Greeting
-  welcomeGreeting: {
+  headerBackgroundImage: {
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+
+  headerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: 50,
+  },
+
+  headerContent: {
+    flex: 1,
+  },
+
+  headerTitle: {
+    ...textStyles.h4,
+    color: colors.white,
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+
+  headerSubtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+
+  headerSubtitle: {
+    ...textStyles.body2,
+    color: colors.white,
+    opacity: 0.9,
+  },
+
+  headerArrow: {
+    marginLeft: spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  headerArrowText: {
+    color: colors.white,
+    fontSize: 14,
+  },
+
+  headerCards: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+
+  cardIcon: {
+    width: 40,
+    height: 25,
+    backgroundColor: colors.primary[500],
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  cardIconText: {
+    fontSize: 12,
+  },
+
+  // Search Section
+  searchContainer: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    zIndex: 1,
+  },
+
+  searchBar: {
+    backgroundColor: colors.white,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    shadowColor: colors.gray[900],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  searchIcon: {
+    marginRight: spacing.md,
+  },
+
+  searchIconText: {
+    fontSize: 18,
+    color: colors.gray[500],
+  },
+
+  searchText: {
     ...textStyles.body1,
-    color: colors.gray[700],
-    marginBottom: spacing.xl,
-    paddingHorizontal: spacing.sm,
+    color: colors.gray[500],
+    flex: 1,
+  },
+
+  qrIcon: {
+    padding: spacing.xs,
+  },
+
+  qrIconText: {
+    fontSize: 20,
+    color: colors.gray[600],
   },
 
   // Services Section
-  servicesSection: {
-    marginBottom: spacing.xl,
-  },
-
-  sectionTitle: {
-    ...textStyles.h4,
-    color: colors.gray[900],
-    fontWeight: '600',
+  servicesContainer: {
     marginBottom: spacing.lg,
-    paddingHorizontal: spacing.sm,
   },
 
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.sm,
+  servicesRow: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.lg,
   },
 
   serviceItem: {
-    width: (width - spacing.lg * 2 - spacing.sm * 2 - spacing.md) / 2,
+    alignItems: 'center',
+    minWidth: 70,
+  },
+
+  serviceIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+    borderWidth: 2,
+    borderColor: colors.primary[100],
+  },
+
+  serviceIcon: {
+    width: 30,
+    height: 30,
+  },
+
+  serviceTitle: {
+    ...textStyles.caption,
+    color: colors.gray[700],
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+
+  // Balance Section
+  balanceSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
     marginBottom: spacing.lg,
   },
 
-  // Promotional Section
-  promoSection: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: spacing.xl,
-    marginBottom: spacing.xl,
+  balanceItem: {
+    flex: 1,
     alignItems: 'center',
+  },
+
+  balanceLabel: {
+    ...textStyles.caption,
+    color: colors.gray[600],
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+
+  balanceValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+
+  balanceValue: {
+    ...textStyles.body1,
+    color: colors.gray[900],
+    fontWeight: '600',
+  },
+
+  balanceIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  balanceIconText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+  homeIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.success[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  homeIconText: {
+    fontSize: 12,
+  },
+
+  // Apply Now Section
+  applyNowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+
+  applyNowText: {
+    ...textStyles.body1,
+    color: colors.gray[900],
+    fontWeight: '600',
+  },
+
+  applyNowArrow: {
+    marginLeft: spacing.xs,
+    color: colors.primary[500],
+    fontSize: 16,
+  },
+
+  // Promotional Card
+  promoCard: {
+    marginHorizontal: spacing.lg,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    overflow: 'hidden',
     shadowColor: colors.gray[900],
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
   },
 
-  promoHeadline: {
-    ...textStyles.h3,
-    color: colors.gray[900],
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    lineHeight: 28,
-  },
-
-  promoImage: {
-    width: width - spacing.lg * 4,
+  promoBackground: {
     height: 200,
   },
 
-  // Footer
-  footer: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
+  promoBackgroundImage: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
 
-  successBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.success[50],
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 25,
-    marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.success[100],
+  promoOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    padding: spacing.lg,
+    justifyContent: 'space-between',
   },
 
-  successIcon: {
-    ...textStyles.body1,
-    color: colors.success[600],
+  promoTitle: {
+    ...textStyles.h3,
+    color: colors.white,
     fontWeight: 'bold',
-    marginRight: spacing.sm,
+    fontStyle: 'italic',
   },
 
-  successText: {
+  promoSubtitle: {
     ...textStyles.body2,
-    color: colors.success[700],
+    color: colors.white,
+    opacity: 0.9,
+    marginTop: spacing.xs,
+  },
+
+  promoCardImage: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    padding: spacing.sm,
+    alignSelf: 'flex-start',
+  },
+
+  promoCardText: {
+    ...textStyles.caption,
+    color: colors.white,
     fontWeight: '600',
+  },
+
+  promoFooter: {
+    ...textStyles.body1,
+    color: colors.gray[900],
+    fontWeight: '600',
+    padding: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+
+  promoSponsor: {
+    ...textStyles.caption,
+    color: colors.gray[600],
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
 });
