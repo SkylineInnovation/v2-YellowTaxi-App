@@ -146,12 +146,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
         <View style={styles.searchContainer}>
           <TouchableOpacity style={styles.searchBar} onPress={handleSearchPress}>
             <View style={styles.searchIcon}>
-              <Text style={styles.searchIconText}>🔍</Text>
+              <View style={styles.searchIconCircle} />
+              <View style={styles.searchIconHandle} />
             </View>
             <Text style={styles.searchText}>Search the YellowTaxi</Text>
-            <TouchableOpacity style={styles.qrIcon}>
-              <Text style={styles.qrIconText}>⚏</Text>
-            </TouchableOpacity>
           </TouchableOpacity>
         </View>
 
@@ -301,7 +299,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     shadowColor: colors.gray[900],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -311,11 +309,28 @@ const styles = StyleSheet.create({
 
   searchIcon: {
     marginRight: spacing.md,
+    position: 'relative',
+    width: 18,
+    height: 18,
   },
 
-  searchIconText: {
-    fontSize: 18,
-    color: colors.gray[500],
+  searchIconCircle: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+  },
+
+  searchIconHandle: {
+    width: 8,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.gray[400],
+    position: 'absolute',
+    right: -1,
+    bottom: 2,
+    transform: [{ rotate: '45deg' }],
   },
 
   searchText: {

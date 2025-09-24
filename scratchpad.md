@@ -355,6 +355,7 @@ The YellowTaxi welcome screen now features a modern, visually appealing service 
 - [x] Style Balance & Use Points cards with bordered light-yellow backgrounds
 - [x] Restore "Apply now →" CTA header and keep single promo message beneath card image
 - [x] Make promo headline bold/larger with supporting subtitle copy
+- [x] Refine search box: slimmer height and flat magnifier icon
 
 **Modern Grab-Style Layout Achieved:**
 The YellowTaxi welcome screen now mirrors the Grab app's layout while maintaining brand colors, featuring an immersive header, polished search bar, scrollable service icons, quick account stats, and an enhanced promotional banner with real imagery.
