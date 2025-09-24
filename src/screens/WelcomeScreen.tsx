@@ -191,29 +191,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Apply Now Section */}
-        <TouchableOpacity style={styles.applyNowContainer}>
+        <TouchableOpacity style={styles.applyNowContainer} activeOpacity={0.8}>
           <Text style={styles.applyNowText}>Apply now</Text>
           <Text style={styles.applyNowArrow}>→</Text>
         </TouchableOpacity>
 
         {/* YellowTaxi Card Promotional Banner */}
         <View style={styles.promoCard}>
-          <ImageBackground
+          <Image
             source={require('../assets/images/big-yellowtaxi-card.png')}
-            style={styles.promoBackground}
-            imageStyle={styles.promoBackgroundImage}
-          >
-            <View style={styles.promoOverlay}>
-              <Text style={styles.promoTitle}>limitless enjoyment</Text>
-              <Text style={styles.promoSubtitle}>with the highest-limits in the card</Text>
-              <View style={styles.promoCardImage}>
-                <Text style={styles.promoCardText}>YellowTaxi PRIVI Miles Card</Text>
-              </View>
-            </View>
-          </ImageBackground>
-          <Text style={styles.promoFooter}>Enjoy over 44,000 miles when you sign up</Text>
-          <Text style={styles.promoSponsor}>Sponsored by YellowTaxi PRIVI Miles Card</Text>
+            style={styles.promoImage}
+            resizeMode="cover"
+          />
+          <Text style={styles.promoMessage}>
+            Apply NOW for YellowTaxi Card and Enjoy the Online Payment without Carrying Cash
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -437,8 +429,9 @@ const styles = StyleSheet.create({
   applyNowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
 
   applyNowText: {
@@ -448,9 +441,9 @@ const styles = StyleSheet.create({
   },
 
   applyNowArrow: {
-    marginLeft: spacing.xs,
     color: colors.primary[500],
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '600',
   },
 
   // Promotional Card
@@ -459,68 +452,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: colors.gray[900],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
 
-  promoBackground: {
+  promoImage: {
+    width: '100%',
     height: 200,
+    borderRadius: 12,
   },
 
-  promoBackgroundImage: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-
-  promoOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    padding: spacing.lg,
-    justifyContent: 'space-between',
-  },
-
-  promoTitle: {
-    ...textStyles.h3,
-    color: colors.white,
-    fontWeight: 'bold',
-    fontStyle: 'italic',
-  },
-
-  promoSubtitle: {
-    ...textStyles.body2,
-    color: colors.white,
-    opacity: 0.9,
-    marginTop: spacing.xs,
-  },
-
-  promoCardImage: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
-    padding: spacing.sm,
-    alignSelf: 'flex-start',
-  },
-
-  promoCardText: {
-    ...textStyles.caption,
-    color: colors.white,
-    fontWeight: '600',
-  },
-
-  promoFooter: {
+  promoMessage: {
     ...textStyles.body1,
-    color: colors.gray[900],
+    color: colors.gray[800],
     fontWeight: '600',
-    padding: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-
-  promoSponsor: {
-    ...textStyles.caption,
-    color: colors.gray[600],
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
+    lineHeight: 22,
   },
 });
