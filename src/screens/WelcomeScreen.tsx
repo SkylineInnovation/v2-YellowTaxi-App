@@ -29,6 +29,7 @@ interface ServiceItem {
   description?: string;
   route?: string;
   comingSoon?: boolean;
+  iconSize?: number;
 }
 
 const services: ServiceItem[] = [
@@ -37,6 +38,7 @@ const services: ServiceItem[] = [
     imageSource: require('../assets/images/yellowtax-icon.png'),
     title: 'Rides',
     route: 'BookRide',
+    iconSize: 86,
   },
   {
     id: 'food',
@@ -164,7 +166,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
               >
                 <View style={styles.serviceIconContainer}>
                   <View style={styles.gradientCircle} />
-                  <Image source={service.imageSource} style={styles.serviceIcon} resizeMode="contain" />
+                  <Image
+                    source={service.imageSource}
+                    style={[styles.serviceIcon, service.iconSize ? { width: service.iconSize, height: service.iconSize } : null]}
+                    resizeMode="contain"
+                  />
                 </View>
                 <Text style={styles.serviceTitle}>{service.title}</Text>
               </TouchableOpacity>
