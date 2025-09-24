@@ -35,25 +35,25 @@ const services: ServiceItem[] = [
   {
     id: 'transport',
     imageSource: require('../assets/images/yellowtax-icon.png'),
-    title: 'Transport',
+    title: 'Rides',
     route: 'BookRide',
   },
   {
     id: 'food',
     imageSource: require('../assets/images/food-icon.png'),
-    title: 'Food',
+    title: 'Order Foods',
     comingSoon: true,
   },
   {
     id: 'mart',
     imageSource: require('../assets/images/credit-card-icon.png'),
-    title: 'Mart',
+    title: 'YellowTaxi Card',
     comingSoon: true,
   },
   {
     id: 'express',
     imageSource: require('../assets/images/taxi-driver.png'),
-    title: 'Express',
+    title: 'Become Driver',
     comingSoon: true,
   },
 ];
