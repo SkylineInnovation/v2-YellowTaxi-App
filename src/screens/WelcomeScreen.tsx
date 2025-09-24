@@ -184,17 +184,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
               </View>
             </View>
           </View>
-          
-          <View style={styles.balanceItem}>
-            <Text style={styles.balanceLabel}>Ride to</Text>
-            <Text style={styles.balanceLabel}>Home</Text>
-            <View style={styles.balanceValueContainer}>
-              <View style={styles.homeIcon}>
-                <Text style={styles.homeIconText}>🏠</Text>
-              </View>
-            </View>
-          </View>
-          
+
           <View style={styles.balanceItem}>
             <Text style={styles.balanceLabel}>Use Points</Text>
             <Text style={styles.balanceValue}>4,291</Text>
@@ -394,11 +384,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.lg,
+    gap: spacing.md,
   },
 
   balanceItem: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: colors.primary[50],
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
   },
 
   balanceLabel: {
@@ -412,6 +409,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+    marginTop: spacing.xs,
   },
 
   balanceValue: {
@@ -433,19 +431,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 10,
     fontWeight: 'bold',
-  },
-
-  homeIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.success[500],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  homeIconText: {
-    fontSize: 12,
   },
 
   // Apply Now Section
