@@ -343,3 +343,21 @@ The YellowTaxi welcome screen now features a modern, visually appealing service 
 - Firestore composite queries (where + orderBy on different fields) require explicit index creation
 - Service icons grid layout provides better visual organization than vertical action cards
 - Reusable UI components should follow consistent design patterns and TypeScript interfaces
+
+### Grab-Inspired Welcome Screen Redesign ✅
+- [x] Replace hero section with immersive Unsplash background header
+- [x] Add promotional messaging: "Explore over 1,000 rides worldwide"
+- [x] Implement rounded search bar with search + QR icons
+- [x] Convert services list into horizontal carousel with larger image-based icons
+- [x] Introduce balance/ride points quick stats section
+- [x] Create "Apply now" CTA and revamped promotional card with overlay text
+- [x] Increase service icon sizes (64px) and remove circular backgrounds for cleaner look
+
+**Modern Grab-Style Layout Achieved:**
+The YellowTaxi welcome screen now mirrors the Grab app's layout while maintaining brand colors, featuring an immersive header, polished search bar, scrollable service icons, quick account stats, and an enhanced promotional banner with real imagery.
+
+**Design Highlights:**
+- Consistent YellowTaxi branding with professional typography and spacing
+- Larger service icons for improved recognition and touch targets
+- Responsive SafeAreaView + ImageBackground usage for modern UI
+- Card-based promotional section with overlay text and supporting copy

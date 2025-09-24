@@ -394,20 +394,19 @@ const styles = StyleSheet.create({
   },
 
   serviceIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary[50],
+    width: 88,
+    height: 88,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
-    borderWidth: 2,
-    borderColor: colors.primary[100],
+    borderWidth: 0,
   },
 
   serviceIcon: {
-    width: 30,
-    height: 30,
+    width: 64,
+    height: 64,
   },
 
   serviceTitle: {
