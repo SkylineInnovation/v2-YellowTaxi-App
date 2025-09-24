@@ -163,6 +163,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                 onPress={() => handleServicePress(service)}
               >
                 <View style={styles.serviceIconContainer}>
+                  <View style={styles.gradientCircle} />
                   <Image source={service.imageSource} style={styles.serviceIcon} resizeMode="contain" />
                 </View>
                 <Text style={styles.serviceTitle}>{service.title}</Text>
@@ -366,17 +367,30 @@ const styles = StyleSheet.create({
   serviceIconContainer: {
     width: 88,
     height: 88,
-    borderRadius: 12,
-    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
-    borderWidth: 0,
+    position: 'relative',
+  },
+
+  gradientCircle: {
+    position: 'absolute',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.primary[400],
+    shadowColor: colors.primary[500],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1,
   },
 
   serviceIcon: {
-    width: 64,
-    height: 64,
+    width: 80,
+    height: 80,
+    zIndex: 2,
   },
 
   serviceTitle: {
