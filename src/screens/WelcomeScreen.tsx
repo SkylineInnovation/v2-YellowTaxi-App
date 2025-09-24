@@ -9,12 +9,67 @@ import {
   Dimensions,
 } from 'react-native';
 
-import { Screen, Button, Logo } from '../components/ui';
+import { Screen, Button, Logo, ServiceIcon } from '../components/ui';
 import { useAppDispatch, useAppSelector } from '../store';
 import { signOut } from '../store/slices/authSlice';
 import { colors, textStyles, spacing } from '../theme';
 
 const { width } = Dimensions.get('window');
+
+// Service icons data
+interface ServiceItem {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  route?: string;
+  comingSoon?: boolean;
+}
+
+const services: ServiceItem[] = [
+  {
+    id: 'ride-order',
+    icon: '🚕',
+    title: 'Ride Order',
+    description: 'Book a taxi ride',
+    route: 'BookRide',
+  },
+  {
+    id: 'food-order',
+    icon: '🍔',
+    title: 'Food Order',
+    description: 'Order food delivery',
+    comingSoon: true,
+  },
+  {
+    id: 'yellowtaxi-card',
+    icon: '💳',
+    title: 'YellowTaxi Card',
+    description: 'Manage your card',
+    comingSoon: true,
+  },
+  {
+    id: 'package-delivery',
+    icon: '📦',
+    title: 'Package Delivery',
+    description: 'Send packages',
+    comingSoon: true,
+  },
+  {
+    id: 'become-driver',
+    icon: '🚗',
+    title: 'Become Driver',
+    description: 'Start earning',
+    comingSoon: true,
+  },
+  {
+    id: 'manage-profile',
+    icon: '👤',
+    title: 'Profile',
+    description: 'Account settings',
+    comingSoon: true,
+  },
+];
 
 interface WelcomeScreenProps {
   navigation?: any;
@@ -71,13 +126,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     return 'Good Evening';
   };
 
-  const handleFeaturePress = (feature: string) => {
-    if (feature === 'Book a Ride' && navigation) {
-      navigation.navigate('BookRide');
+  const handleServicePress = (service: ServiceItem) => {
+    if (service.route && navigation) {
+      navigation.navigate(service.route);
     } else {
       Alert.alert(
         'Coming Soon',
-        `${feature} feature will be available in the next update!`,
+        `${service.title} feature will be available in the next update!`,
         [{ text: 'OK' }]
       );
     }
@@ -147,60 +202,22 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Action Cards */}
-        <View style={styles.actionsSection}>
-          <Text style={styles.sectionTitle}>Get Started</Text>
-
-          <TouchableOpacity
-            style={[styles.actionCard, styles.primaryAction]}
-            onPress={() => handleFeaturePress('Book a Ride')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>🚕</Text>
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Book a Ride</Text>
-              <Text style={styles.actionDescription}>
-                Request a taxi and track your driver in real-time
-              </Text>
-            </View>
-            <Text style={styles.actionArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => handleFeaturePress('Become a Driver')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>🚗</Text>
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Become a Driver</Text>
-              <Text style={styles.actionDescription}>
-                Start earning by driving passengers
-              </Text>
-            </View>
-            <Text style={styles.actionArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => handleFeaturePress('Manage Profile')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>👤</Text>
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Manage Profile</Text>
-              <Text style={styles.actionDescription}>
-                Update your information and preferences
-              </Text>
-            </View>
-            <Text style={styles.actionArrow}>→</Text>
-          </TouchableOpacity>
+        {/* Services Grid */}
+        <View style={styles.servicesSection}>
+          <Text style={styles.sectionTitle}>Our Services</Text>
+          <View style={styles.servicesGrid}>
+            {services.map((service) => (
+              <ServiceIcon
+                key={service.id}
+                icon={service.icon}
+                title={service.title}
+                description={service.description}
+                onPress={() => handleServicePress(service)}
+                style={styles.serviceItem}
+                testID={`service-${service.id}`}
+              />
+            ))}
+          </View>
         </View>
 
         {/* Footer */}
@@ -371,8 +388,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Actions Section
-  actionsSection: {
+  // Services Section
+  servicesSection: {
     marginBottom: spacing.xl,
   },
 
@@ -384,61 +401,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
   },
 
-  actionCard: {
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+  servicesGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: colors.gray[900],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: colors.gray[100],
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.sm,
   },
 
-  primaryAction: {
-    backgroundColor: colors.primary[50],
-    borderColor: colors.primary[200],
-  },
-
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.gray[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-
-  actionIconText: {
-    fontSize: 24,
-  },
-
-  actionContent: {
-    flex: 1,
-  },
-
-  actionTitle: {
-    ...textStyles.body1,
-    color: colors.gray[900],
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-
-  actionDescription: {
-    ...textStyles.body2,
-    color: colors.gray[600],
-  },
-
-  actionArrow: {
-    ...textStyles.h4,
-    color: colors.gray[400],
-    fontWeight: '300',
+  serviceItem: {
+    width: (width - spacing.lg * 2 - spacing.sm * 2 - spacing.md) / 2,
+    marginBottom: spacing.lg,
   },
 
   // Footer
