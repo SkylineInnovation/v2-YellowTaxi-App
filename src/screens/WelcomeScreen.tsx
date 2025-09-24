@@ -203,9 +203,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             style={styles.promoImage}
             resizeMode="cover"
           />
-          <Text style={styles.promoMessage}>
-            Apply NOW for YellowTaxi Card and Enjoy the Online Payment without Carrying Cash
-          </Text>
+          <View style={styles.promoCopyContainer}>
+            <Text style={styles.promoHeadline}>Apply NOW for YellowTaxi Card</Text>
+            <Text style={styles.promoSubtext}>Enjoy the Online Payment without Carrying Cash</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -462,10 +463,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
 
-  promoMessage: {
-    ...textStyles.body1,
-    color: colors.gray[800],
-    fontWeight: '600',
-    lineHeight: 22,
+  promoCopyContainer: {
+    gap: spacing.xs,
+  },
+
+  promoHeadline: {
+    ...textStyles.h4,
+    color: colors.gray[900],
+    fontWeight: '700',
+  },
+
+  promoSubtext: {
+    ...textStyles.body2,
+    color: colors.gray[700],
   },
 });
