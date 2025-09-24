@@ -4,3 +4,5 @@ export { PhoneInput } from './PhoneInput';
 export { OTPInput } from './OTPInput';
 export { Screen } from './Screen';
 export { Logo } from './Logo';
+export { ServiceIcon } from './ServiceIcon';
+export { SearchBar } from './SearchBar';

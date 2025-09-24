@@ -7,14 +7,58 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Image,
+  ImageBackground,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 
-import { Screen, Button, Logo } from '../components/ui';
+import { Screen, Button, Logo, ServiceIcon, SearchBar } from '../components/ui';
 import { useAppDispatch, useAppSelector } from '../store';
 import { signOut } from '../store/slices/authSlice';
 import { colors, textStyles, spacing } from '../theme';
 
 const { width } = Dimensions.get('window');
+
+// Service icons data
+interface ServiceItem {
+  id: string;
+  icon?: string;
+  imageSource?: any;
+  title: string;
+  description?: string;
+  route?: string;
+  comingSoon?: boolean;
+  iconSize?: number;
+}
+
+const services: ServiceItem[] = [
+  {
+    id: 'transport',
+    imageSource: require('../assets/images/yellowtax-icon.png'),
+    title: 'Rides',
+    route: 'BookRide',
+    iconSize: 86,
+  },
+  {
+    id: 'food',
+    imageSource: require('../assets/images/food-icon.png'),
+    title: 'Order Foods',
+    comingSoon: true,
+  },
+  {
+    id: 'mart',
+    imageSource: require('../assets/images/credit-card-icon.png'),
+    title: 'YellowTaxi Card',
+    comingSoon: true,
+  },
+  {
+    id: 'express',
+    imageSource: require('../assets/images/taxi-driver.png'),
+    title: 'Become Driver',
+    comingSoon: true,
+  },
+];
 
 interface WelcomeScreenProps {
   navigation?: any;
@@ -51,424 +95,421 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     );
   };
 
-  const formatPhoneNumber = (phoneNumber: string | null) => {
-    if (!phoneNumber) return 'Unknown';
 
-    // Format phone number for display
-    if (phoneNumber.startsWith('+1') && phoneNumber.length === 12) {
-      // US format: +1 (XXX) XXX-XXXX
-      const digits = phoneNumber.slice(2);
-      return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    }
-
-    return phoneNumber;
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  };
-
-  const handleFeaturePress = (feature: string) => {
-    if (feature === 'Book a Ride' && navigation) {
-      navigation.navigate('BookRide');
+  const handleServicePress = (service: ServiceItem) => {
+    if (service.route && navigation) {
+      navigation.navigate(service.route);
     } else {
       Alert.alert(
         'Coming Soon',
-        `${feature} feature will be available in the next update!`,
+        `${service.title} feature will be available in the next update!`,
         [{ text: 'OK' }]
       );
     }
   };
 
+  const handleSearchPress = () => {
+    Alert.alert(
+      'Search',
+      'Search functionality will be available soon!',
+      [{ text: 'OK' }]
+    );
+  };
+
   return (
-    <Screen>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <ScrollView
-        style={styles.container}
+        style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
-          <View style={styles.logoContainer}>
-            <Logo size={80} />
-          </View>
-          <Text style={styles.greeting}>{getGreeting()}!</Text>
-          <Text style={styles.welcomeTitle}>Welcome to YellowTaxi</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Your ride is just a tap away
-          </Text>
-        </View>
-
-        {/* Quick Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>24/7</Text>
-            <Text style={styles.statLabel}>Available</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>5★</Text>
-            <Text style={styles.statLabel}>Rated</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>Fast</Text>
-            <Text style={styles.statLabel}>Pickup</Text>
-          </View>
-        </View>
-
-        {/* Account Info Card */}
-        <View style={styles.accountCard}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Your Account</Text>
-            <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>✓ Verified</Text>
+        {/* Header with Background Image */}
+        <ImageBackground
+          source={require('../assets/images/yellowtaxi-background-pro.jpg')}
+          style={styles.headerBackground}
+          imageStyle={styles.headerBackgroundImage}
+        >
+          <View style={styles.headerOverlay}>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>Explore over 1,000</Text>
+              <Text style={styles.headerTitle}>rides worldwide</Text>
+              <View style={styles.headerSubtitleContainer}>
+                <Text style={styles.headerSubtitle}>Exclusively with YellowTaxi Cards</Text>
+                <TouchableOpacity style={styles.headerArrow}>
+                  <Text style={styles.headerArrowText}>→</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
+        </ImageBackground>
 
-          <View style={styles.accountInfo}>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Phone Number</Text>
-              <Text style={styles.infoValue}>
-                {formatPhoneNumber(user?.phoneNumber || null)}
-              </Text>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <TouchableOpacity style={styles.searchBar} onPress={handleSearchPress}>
+            <View style={styles.searchIcon}>
+              <View style={styles.searchIconCircle} />
+              <View style={styles.searchIconHandle} />
             </View>
-
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Member Since</Text>
-              <Text style={styles.infoValue}>
-                {new Date().toLocaleDateString('en-US', {
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Action Cards */}
-        <View style={styles.actionsSection}>
-          <Text style={styles.sectionTitle}>Get Started</Text>
-
-          <TouchableOpacity
-            style={[styles.actionCard, styles.primaryAction]}
-            onPress={() => handleFeaturePress('Book a Ride')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>🚕</Text>
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Book a Ride</Text>
-              <Text style={styles.actionDescription}>
-                Request a taxi and track your driver in real-time
-              </Text>
-            </View>
-            <Text style={styles.actionArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => handleFeaturePress('Become a Driver')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>🚗</Text>
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Become a Driver</Text>
-              <Text style={styles.actionDescription}>
-                Start earning by driving passengers
-              </Text>
-            </View>
-            <Text style={styles.actionArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => handleFeaturePress('Manage Profile')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>👤</Text>
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Manage Profile</Text>
-              <Text style={styles.actionDescription}>
-                Update your information and preferences
-              </Text>
-            </View>
-            <Text style={styles.actionArrow}>→</Text>
+            <Text style={styles.searchText}>Search the YellowTaxi</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.successBadge}>
-            <Text style={styles.successIcon}>✓</Text>
-            <Text style={styles.successText}>Authentication Successful</Text>
+        {/* Services Row */}
+        <View style={styles.servicesContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.servicesRow}>
+            {services.map((service) => (
+              <TouchableOpacity
+                key={service.id}
+                style={styles.serviceItem}
+                onPress={() => handleServicePress(service)}
+              >
+                <View style={styles.serviceIconContainer}>
+                  <View style={styles.gradientCircle} />
+                  <Image
+                    source={service.imageSource}
+                    style={[styles.serviceIcon, service.iconSize ? { width: service.iconSize, height: service.iconSize } : null]}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text style={styles.serviceTitle}>{service.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Balance Section */}
+        <View style={styles.balanceSection}>
+          <View style={styles.balanceItem}>
+            <Text style={styles.balanceLabel}>Balance</Text>
+            <View style={styles.balanceValueContainer}>
+              <Text style={styles.balanceValue}>$$ 0.00</Text>
+              <View style={styles.balanceIcon}>
+                <Text style={styles.balanceIconText}>$</Text>
+              </View>
+            </View>
           </View>
 
-          <Button
-            title="Sign Out"
-            variant="outline"
-            onPress={handleSignOut}
-            fullWidth
-            testID="sign-out-button"
+          <View style={styles.balanceItem}>
+            <Text style={styles.balanceLabel}>Use Points</Text>
+            <Text style={styles.balanceValue}>4,291</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.applyNowContainer} activeOpacity={0.8}>
+          <Text style={styles.applyNowText}>Apply now</Text>
+          <Text style={styles.applyNowArrow}>→</Text>
+        </TouchableOpacity>
+
+        {/* YellowTaxi Card Promotional Banner */}
+        <View style={styles.promoCard}>
+          <Image
+            source={require('../assets/images/big-yellowtaxi-card.png')}
+            style={styles.promoImage}
+            resizeMode="cover"
           />
+          <View style={styles.promoCopyContainer}>
+            <Text style={styles.promoHeadline}>Apply NOW for YellowTaxi Card</Text>
+            <Text style={styles.promoSubtext}>Enjoy the Online Payment without Carrying Cash</Text>
+          </View>
         </View>
       </ScrollView>
-    </Screen>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.gray[50],
+  },
+
+  scrollContainer: {
+    flex: 1,
   },
 
   scrollContent: {
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl,
   },
 
-  // Hero Section
-  heroSection: {
-    alignItems: 'center',
-    paddingVertical: spacing['3xl'],
-    marginBottom: spacing.lg,
+  // Header Section
+  headerBackground: {
+    height: 180,
+    marginBottom: -20,
   },
 
-  logoContainer: {
-    marginBottom: spacing.lg,
-    shadowColor: colors.primary[500],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  headerBackgroundImage: {
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 
-  greeting: {
-    ...textStyles.h4,
-    color: colors.primary[600],
-    fontWeight: '500',
-    marginBottom: spacing.xs,
-  },
-
-  welcomeTitle: {
-    ...textStyles.h1,
-    color: colors.gray[900],
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-
-  welcomeSubtitle: {
-    ...textStyles.body1,
-    color: colors.gray[600],
-    textAlign: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-
-  // Stats Section
-  statsContainer: {
+  headerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.xl,
-    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: 50,
   },
 
-  statCard: {
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: spacing.lg,
+  headerContent: {
     flex: 1,
-    marginHorizontal: spacing.xs,
+  },
+
+  headerTitle: {
+    ...textStyles.h4,
+    color: colors.white,
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+
+  headerSubtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+
+  headerSubtitle: {
+    ...textStyles.body2,
+    color: colors.white,
+    opacity: 0.9,
+  },
+
+  headerArrow: {
+    marginLeft: spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  headerArrowText: {
+    color: colors.white,
+    fontSize: 14,
+  },
+
+  // Search Section
+  searchContainer: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    zIndex: 1,
+  },
+
+  searchBar: {
+    backgroundColor: colors.white,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
     shadowColor: colors.gray[900],
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
   },
 
-  statNumber: {
-    ...textStyles.h3,
-    color: colors.primary[600],
-    fontWeight: 'bold',
-    marginBottom: spacing.xs,
+  searchIcon: {
+    marginRight: spacing.md,
+    position: 'relative',
+    width: 18,
+    height: 18,
   },
 
-  statLabel: {
-    ...textStyles.caption,
+  searchIconCircle: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: colors.gray[400],
+  },
+
+  searchIconHandle: {
+    width: 8,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.gray[400],
+    position: 'absolute',
+    right: -1,
+    bottom: 2,
+    transform: [{ rotate: '45deg' }],
+  },
+
+  searchText: {
+    ...textStyles.body1,
+    color: colors.gray[500],
+    flex: 1,
+  },
+
+  qrIcon: {
+    padding: spacing.xs,
+  },
+
+  qrIconText: {
+    fontSize: 20,
     color: colors.gray[600],
-    fontWeight: '500',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
 
-  // Account Card
-  accountCard: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: spacing.xl,
-    marginBottom: spacing.xl,
-    shadowColor: colors.gray[900],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  // Services Section
+  servicesContainer: {
     marginBottom: spacing.lg,
   },
 
-  cardTitle: {
-    ...textStyles.h4,
-    color: colors.gray[900],
-    fontWeight: '600',
-  },
-
-  verifiedBadge: {
-    backgroundColor: colors.success[50],
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.success[100],
-  },
-
-  verifiedText: {
-    ...textStyles.caption,
-    color: colors.success[700],
-    fontWeight: '600',
-  },
-
-  accountInfo: {
+  servicesRow: {
+    paddingHorizontal: spacing.lg,
     gap: spacing.lg,
   },
 
-  infoItem: {
+  serviceItem: {
+    alignItems: 'center',
+    minWidth: 70,
+  },
+
+  serviceIconContainer: {
+    width: 88,
+    height: 88,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+    position: 'relative',
+  },
+
+  gradientCircle: {
+    position: 'absolute',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.primary[400],
+    shadowColor: colors.primary[500],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1,
+  },
+
+  serviceIcon: {
+    width: 80,
+    height: 80,
+    zIndex: 2,
+  },
+
+  serviceTitle: {
+    ...textStyles.caption,
+    color: colors.gray[700],
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+
+  // Balance Section
+  balanceSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  infoLabel: {
-    ...textStyles.body2,
-    color: colors.gray[600],
-    fontWeight: '500',
-  },
-
-  infoValue: {
-    ...textStyles.body2,
-    color: colors.gray[900],
-    fontWeight: '600',
-  },
-
-  // Actions Section
-  actionsSection: {
-    marginBottom: spacing.xl,
-  },
-
-  sectionTitle: {
-    ...textStyles.h4,
-    color: colors.gray[900],
-    fontWeight: '600',
+    paddingHorizontal: spacing.lg,
     marginBottom: spacing.lg,
+    gap: spacing.md,
+  },
+
+  balanceItem: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: colors.primary[50],
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.sm,
   },
 
-  actionCard: {
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+  balanceLabel: {
+    ...textStyles.caption,
+    color: colors.gray[600],
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+
+  balanceValueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: colors.gray[900],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: colors.gray[100],
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
 
-  primaryAction: {
-    backgroundColor: colors.primary[50],
-    borderColor: colors.primary[200],
-  },
-
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.gray[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-
-  actionIconText: {
-    fontSize: 24,
-  },
-
-  actionContent: {
-    flex: 1,
-  },
-
-  actionTitle: {
+  balanceValue: {
     ...textStyles.body1,
     color: colors.gray[900],
     fontWeight: '600',
-    marginBottom: spacing.xs,
   },
 
-  actionDescription: {
-    ...textStyles.body2,
-    color: colors.gray[600],
-  },
-
-  actionArrow: {
-    ...textStyles.h4,
-    color: colors.gray[400],
-    fontWeight: '300',
-  },
-
-  // Footer
-  footer: {
-    paddingVertical: spacing.lg,
+  balanceIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.primary[500],
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  successBadge: {
+  balanceIconText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+  // Apply Now Section
+  applyNowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.success[50],
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 25,
-    marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.success[100],
+    marginBottom: spacing.md,
   },
 
-  successIcon: {
+  applyNowText: {
     ...textStyles.body1,
-    color: colors.success[600],
-    fontWeight: 'bold',
-    marginRight: spacing.sm,
+    color: colors.gray[900],
+    fontWeight: '600',
   },
 
-  successText: {
-    ...textStyles.body2,
-    color: colors.success[700],
+  applyNowArrow: {
+    color: colors.primary[500],
+    fontSize: 18,
     fontWeight: '600',
+  },
+
+  // Promotional Card
+  promoCard: {
+    marginHorizontal: spacing.lg,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+
+  promoImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+  },
+
+  promoCopyContainer: {
+    gap: spacing.xs,
+  },
+
+  promoHeadline: {
+    ...textStyles.h4,
+    color: colors.gray[900],
+    fontWeight: '700',
+  },
+
+  promoSubtext: {
+    ...textStyles.body2,
+    color: colors.gray[700],
   },
 });
