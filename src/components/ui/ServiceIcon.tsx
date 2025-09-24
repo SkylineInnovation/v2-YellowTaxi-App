@@ -5,11 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
+  Image,
+  ImageSourcePropType,
 } from 'react-native';
 import { colors, textStyles, spacing } from '../../theme';
 
 export interface ServiceIconProps {
-  icon: string;
+  icon?: string; // Keep for backward compatibility
+  imageSource?: ImageSourcePropType; // New prop for image assets
   title: string;
   description?: string;
   onPress: () => void;
@@ -20,6 +23,7 @@ export interface ServiceIconProps {
 
 export const ServiceIcon: React.FC<ServiceIconProps> = ({
   icon,
+  imageSource,
   title,
   description,
   onPress,
@@ -40,7 +44,11 @@ export const ServiceIcon: React.FC<ServiceIconProps> = ({
       testID={testID}
     >
       <View style={styles.iconContainer}>
-        <Text style={styles.iconText}>{icon}</Text>
+        {imageSource ? (
+          <Image source={imageSource} style={styles.iconImage} resizeMode="contain" />
+        ) : (
+          <Text style={styles.iconText}>{icon}</Text>
+        )}
       </View>
       <Text style={styles.title} numberOfLines={2}>
         {title}
@@ -91,6 +99,11 @@ const styles = StyleSheet.create({
   iconText: {
     fontSize: 28,
     lineHeight: 32,
+  },
+
+  iconImage: {
+    width: 32,
+    height: 32,
   },
 
   title: {
