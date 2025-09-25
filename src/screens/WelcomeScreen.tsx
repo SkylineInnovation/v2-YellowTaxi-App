@@ -51,7 +51,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { t } = useTranslation();
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, changeLanguage } = useLanguage();
 
   // Generate services array with translations
   const services: ServiceItem[] = [
@@ -109,6 +109,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     );
   };
 
+  const handleLanguageSwitch = async () => {
+    const newLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+    await changeLanguage(newLanguage);
+  };
 
   const handleServicePress = (service: ServiceItem) => {
     if (service.route && navigation) {
@@ -150,11 +154,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
           imageStyle={styles.headerBackgroundImage}
         >
           <View style={styles.headerOverlay}>
-            {/* Logout Button */}
-            <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
-              <View style={styles.logoutIcon}>
-                <Text style={createTextStyle(currentLanguage, styles.logoutIconText, 'bold')}>
-                  {t('welcome.logout')}
+            {/* Language Switcher */}
+            <TouchableOpacity style={styles.languageSwitcher} onPress={handleLanguageSwitch}>
+              <View style={styles.languageIcon}>
+                <Text style={styles.languageIconText}>
+                  {currentLanguage === 'ar' ? 'EN' : 'ع'}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -265,6 +269,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             </Text>
           </View>
         </View>
+
+        {/* Logout Button */}
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
+            <Text style={createTextStyle(currentLanguage, styles.logoutButtonText, 'semiBold')}>
+              {t('welcome.logout')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -311,17 +324,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  logoutButton: {
+  languageSwitcher: {
     position: 'absolute',
     top: 50,
     right: spacing.lg,
     zIndex: 10,
   },
 
-  logoutIcon: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
+  languageIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -329,11 +342,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
 
-  logoutIconText: {
+  languageIconText: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
-    letterSpacing: 0.5,
   },
 
   headerTitle: {
@@ -588,5 +600,32 @@ const styles = StyleSheet.create({
   promoSubtext: {
     ...textStyles.body2,
     color: colors.gray[700],
+  },
+
+  // Logout Button (moved from header)
+  logoutContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+
+  logoutButton: {
+    backgroundColor: colors.gray[100],
+    borderRadius: 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    shadowColor: colors.gray[900],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  logoutButtonText: {
+    ...textStyles.body1,
+    color: colors.gray[700],
+    textAlign: 'center',
   },
 });
