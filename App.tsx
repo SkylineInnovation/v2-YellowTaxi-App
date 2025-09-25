@@ -13,7 +13,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 import { store, persistor } from './src/store';
 import { RootNavigator } from './src/navigation/RootNavigator';
-import { LoadingSplashScreen } from './src/screens/LoadingSplashScreen';
+import { SplashScreen } from './src/screens/SplashScreen';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import './src/i18n';
 
@@ -23,7 +23,7 @@ function App() {
   return (
     <Provider store={store}>
       <LanguageProvider>
-        <PersistGate loading={<LoadingSplashScreen />} persistor={persistor}>
+        <PersistGate loading={<SplashScreen />} persistor={persistor}>
           <SafeAreaProvider>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
             <RootNavigator />

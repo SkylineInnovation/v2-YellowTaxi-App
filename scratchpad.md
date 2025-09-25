@@ -364,6 +364,12 @@ The YellowTaxi app now supports both English and Arabic languages with a profess
 - Professional Arabic typography with El Messiri font
 - Proper text alignment and direction for RTL languages
 
+**Context Error Fix:**
+- Fixed "useLanguage must be used within a LanguageProvider" error
+- Moved LanguageProvider above PersistGate in App.tsx
+- Created separate LoadingSplashScreen for initialization phase
+- Added fallback values in useLanguage hook for graceful degradation
+
 ## Lessons
 - Always check for existing scratchpad before starting new tasks
 - Use the scratchpad to track progress and organize thoughts
