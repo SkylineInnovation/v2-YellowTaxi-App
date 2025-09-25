@@ -4,19 +4,19 @@ import { Platform, TextStyle } from 'react-native';
 export const fonts = {
   arabic: {
     regular: Platform.select({
-      ios: 'ElMessiri-Regular',
+      ios: 'El Messiri',
       android: 'ElMessiri-Regular',
     }),
     medium: Platform.select({
-      ios: 'ElMessiri-Medium',
+      ios: 'El Messiri',
       android: 'ElMessiri-Medium',
     }),
     semiBold: Platform.select({
-      ios: 'ElMessiri-SemiBold',
+      ios: 'El Messiri',
       android: 'ElMessiri-SemiBold',
     }),
     bold: Platform.select({
-      ios: 'ElMessiri-Bold',
+      ios: 'El Messiri',
       android: 'ElMessiri-Bold',
     }),
   },
@@ -46,7 +46,11 @@ export const getFontFamily = (
   weight: 'regular' | 'medium' | 'semiBold' | 'bold' = 'regular'
 ): string => {
   if (language === 'ar') {
-    return fonts.arabic[weight] || fonts.arabic.regular || 'System';
+    const fontFamily = fonts.arabic[weight] || fonts.arabic.regular || 'System';
+    if (__DEV__) {
+      console.log(`Arabic font selected: ${fontFamily} for weight: ${weight}`);
+    }
+    return fontFamily;
   }
   return fonts.english[weight] || fonts.english.regular || 'System';
 };
@@ -57,14 +61,53 @@ export const createTextStyle = (
   baseStyle: TextStyle,
   weight: 'regular' | 'medium' | 'semiBold' | 'bold' = 'regular'
 ): TextStyle => {
-  return {
+  const fontFamily = getFontFamily(language, weight);
+  
+  // For iOS, we need to use fontWeight along with fontFamily for proper font rendering
+  const getFontWeight = (weight: string): TextStyle['fontWeight'] => {
+    switch (weight) {
+      case 'medium':
+        return '500';
+      case 'semiBold':
+        return '600';
+      case 'bold':
+        return 'bold';
+      default:
+        return 'normal';
+    }
+  };
+
+  const style: TextStyle = {
     ...baseStyle,
-    fontFamily: getFontFamily(language, weight),
+    fontFamily,
     // Adjust line height for Arabic text if needed
     ...(language === 'ar' && {
       lineHeight: baseStyle.lineHeight ? baseStyle.lineHeight * 1.1 : undefined,
     }),
   };
+
+  // For iOS Arabic fonts, use fontWeight to ensure proper font variant selection
+  if (Platform.OS === 'ios' && language === 'ar') {
+    style.fontWeight = getFontWeight(weight);
+  }
+
+  // For Android, ensure we don't override the specific font family with fontWeight
+  if (Platform.OS === 'android' && language === 'ar') {
+    // Remove any existing fontWeight to prevent conflicts with specific font families
+    delete style.fontWeight;
+  }
+
+  if (__DEV__) {
+    console.log(`Font style created:`, {
+      language,
+      weight,
+      fontFamily: style.fontFamily,
+      fontWeight: style.fontWeight,
+      platform: Platform.OS,
+    });
+  }
+
+  return style;
 };
 
 // Text direction helper
