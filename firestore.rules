@@ -18,10 +18,13 @@ service cloud.firestore {
     // Orders - users can read/write their own orders
     match /orders/{orderId} {
       allow read, write: if request.auth != null && 
-        (request.auth.uid == resource.data.customer.id || 
+        (request.auth.uid == resource.data.customerId || 
+         request.auth.uid == resource.data.driverId ||
+         request.auth.uid == resource.data.customer.id || 
          request.auth.uid == resource.data.driver.id);
       allow create: if request.auth != null && 
-        request.auth.uid == request.resource.data.customer.id;
+        (request.auth.uid == request.resource.data.customerId ||
+         request.auth.uid == request.resource.data.customer.id);
     }
     
     // Drivers collection - for driver profiles
@@ -42,13 +45,22 @@ service cloud.firestore {
     match /location_updates/{updateId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && 
-        request.auth.uid == request.resource.data.userId;
+        (request.auth.uid == request.resource.data.userId ||
+         request.auth.uid == request.resource.data.customerId ||
+         request.auth.uid == request.resource.data.driverId);
+    }
+    
+    // Allow broader access for development (remove in production)
+    match /{document=**} {
+      allow read: if request.auth != null;
     }
     
     // Notifications - users can read their own notifications
     match /notifications/{notificationId} {
       allow read, write: if request.auth != null && 
-        request.auth.uid == resource.data.userId;
+        (request.auth.uid == resource.data.userId ||
+         request.auth.uid == resource.data.customerId ||
+         request.auth.uid == resource.data.driverId);
       allow create: if request.auth != null;
     }
     
