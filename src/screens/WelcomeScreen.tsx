@@ -51,7 +51,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { t } = useTranslation();
-  const { currentLanguage, changeLanguage } = useLanguage();
+  const { currentLanguage, changeLanguage, isRTL } = useLanguage();
 
   // Generate services array with translations
   const services: ServiceItem[] = [
@@ -155,7 +155,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
         >
           <View style={styles.headerOverlay}>
             {/* Language Switcher */}
-            <TouchableOpacity style={styles.languageSwitcher} onPress={handleLanguageSwitch}>
+            <TouchableOpacity 
+              style={[
+                styles.languageSwitcher,
+                isRTL ? { left: spacing.lg, right: 'auto' } : { right: spacing.lg, left: 'auto' }
+              ]} 
+              onPress={handleLanguageSwitch}
+            >
               <View style={styles.languageIcon}>
                 <Text style={styles.languageIconText}>
                   {currentLanguage === 'ar' ? 'EN' : 'ع'}
@@ -170,12 +176,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
               <Text style={createTextStyle(currentLanguage, styles.headerTitle, 'bold')}>
                 {t('welcome.header.subtitle')}
               </Text>
-              <View style={styles.headerSubtitleContainer}>
+              <View style={[
+                styles.headerSubtitleContainer,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
                 <Text style={createTextStyle(currentLanguage, styles.headerSubtitle)}>
                   {t('welcome.header.description')}
                 </Text>
                 <TouchableOpacity style={styles.headerArrow}>
-                  <Text style={styles.headerArrowText}>→</Text>
+                  <Text style={styles.headerArrowText}>{isRTL ? '←' : '→'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -221,12 +230,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
         </View>
 
         {/* Balance Section */}
-        <View style={styles.balanceSection}>
+        <View style={[
+          styles.balanceSection,
+          isRTL && { flexDirection: 'row-reverse' }
+        ]}>
           <View style={styles.balanceItem}>
             <Text style={createTextStyle(currentLanguage, styles.balanceLabel)}>
               {t('welcome.balance.balance')}
             </Text>
-            <View style={styles.balanceValueContainer}>
+            <View style={[
+              styles.balanceValueContainer,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
               <Text style={createTextStyle(currentLanguage, styles.balanceValue, 'semiBold')}>
                 $$ 0.00
               </Text>
@@ -246,11 +261,17 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.applyNowContainer} activeOpacity={0.8}>
+        <TouchableOpacity 
+          style={[
+            styles.applyNowContainer,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]} 
+          activeOpacity={0.8}
+        >
           <Text style={createTextStyle(currentLanguage, styles.applyNowText, 'semiBold')}>
             {t('welcome.balance.applyNow')}
           </Text>
-          <Text style={styles.applyNowArrow}>→</Text>
+          <Text style={styles.applyNowArrow}>{isRTL ? '←' : '→'}</Text>
         </TouchableOpacity>
 
         {/* YellowTaxi Card Promotional Banner */}

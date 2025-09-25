@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { I18nManager } from 'react-native';
+import { I18nManager, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 
@@ -31,8 +31,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         
         if (savedLanguage) {
           setCurrentLanguage(savedLanguage);
-          setIsRTL(savedLanguage === 'ar');
+          const isArabic = savedLanguage === 'ar';
+          setIsRTL(isArabic);
           await i18n.changeLanguage(savedLanguage);
+          
+          // Set RTL layout on app startup if needed
+          if (isArabic !== I18nManager.isRTL) {
+            I18nManager.allowRTL(isArabic);
+            I18nManager.forceRTL(isArabic);
+          }
         }
         
         if (languageSelected === 'true') {
@@ -61,11 +68,24 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       await AsyncStorage.setItem('languageSelected', 'true');
       setIsLanguageSelected(true);
       
-      // Handle RTL layout
+      // Handle RTL layout changes
       if (newIsRTL !== I18nManager.isRTL) {
         I18nManager.allowRTL(newIsRTL);
         I18nManager.forceRTL(newIsRTL);
-        // Note: App restart may be required for RTL changes to take full effect
+        
+        // Show alert to user about app restart for full RTL support
+        Alert.alert(
+          languageCode === 'ar' ? 'إعادة تشغيل التطبيق' : 'App Restart Required',
+          languageCode === 'ar' 
+            ? 'لتطبيق التغييرات بالكامل، يرجى إعادة تشغيل التطبيق.'
+            : 'To fully apply the layout changes, please restart the app.',
+          [
+            {
+              text: languageCode === 'ar' ? 'موافق' : 'OK',
+              style: 'default',
+            }
+          ]
+        );
       }
     } catch (error) {
       console.error('Error changing language:', error);
