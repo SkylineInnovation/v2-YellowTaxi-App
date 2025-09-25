@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Development rules - more permissive for testing
+    // WARNING: Do not use in production!
+    
+    // Allow authenticated users to read/write most data
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Specific rules for better organization (optional overrides)
+    
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Ride requests - allow authenticated access
+    match /ride-requests/{requestId} {
+      allow read, write, create: if request.auth != null;
+    }
+    
+    // Orders - allow authenticated access
+    match /orders/{orderId} {
+      allow read, write, create: if request.auth != null;
+    }
+    
+    // Drivers collection - allow authenticated access
+    match /drivers/{driverId} {
+      allow read, write, create: if request.auth != null;
+    }
+    
+    // Driver ride requests - allow authenticated access
+    match /driver_ride_requests/{requestId} {
+      allow read, write, create: if request.auth != null;
+    }
+    
+    // Location updates - allow authenticated access
+    match /location_updates/{updateId} {
+      allow read, write, create: if request.auth != null;
+    }
+    
+    // Notifications - allow authenticated access
+    match /notifications/{notificationId} {
+      allow read, write, create: if request.auth != null;
+    }
+    
+    // Driver locations - allow authenticated access
+    match /driver_locations/{driverId} {
+      allow read, write, create: if request.auth != null;
+    }
+  }
+}

@@ -343,6 +343,21 @@ The YellowTaxi welcome screen now features a modern, visually appealing service 
 - Firestore composite queries (where + orderBy on different fields) require explicit index creation
 - Service icons grid layout provides better visual organization than vertical action cards
 - Reusable UI components should follow consistent design patterns and TypeScript interfaces
+- Real-time ride-booking systems require careful state management and service architecture
+- Google Maps integration needs proper API key configuration and permission handling
+- Driver-customer communication flows require separate Redux slices and service layers
+- Location tracking services should be optimized for battery usage and accuracy
+- Navigation type definitions must be updated when adding new screens to avoid TypeScript errors
+- Style arrays in React Native can cause TypeScript issues - use object spread syntax instead
+- Missing image assets cause bundle errors - always verify asset paths before committing
+- Google Maps integration requires proper API key configuration and fallback components
+- Conditional imports with try-catch blocks help prevent crashes when optional dependencies are missing
+- Android permissions for location services must be declared in AndroidManifest.xml
+- Environment configuration files (.env.example) help with API key management and setup
+- Firestore composite indexes are required for complex queries with multiple where clauses
+- Firebase CLI requires proper account authentication and project selection before deployment
+- Index deployment can take several minutes depending on collection size
+- Security rules must be deployed alongside indexes to protect data access
 
 ### Grab-Inspired Welcome Screen Redesign ✅
 - [x] Replace hero section with immersive Unsplash background header

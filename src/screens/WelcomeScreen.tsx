@@ -18,6 +18,12 @@ import { useAppDispatch, useAppSelector } from '../store';
 import { signOut } from '../store/slices/authSlice';
 import { colors, textStyles, spacing } from '../theme';
 
+// Location test disabled to prevent crashes
+// Uncomment to enable location testing:
+// if (__DEV__) {
+//   require('../utils/locationTest');
+// }
+
 const { width } = Dimensions.get('window');
 
 // Service icons data
@@ -56,6 +62,18 @@ const services: ServiceItem[] = [
     id: 'express',
     imageSource: require('../assets/images/taxi-driver.png'),
     title: 'Become Driver',
+    route: 'DriverDashboard',
+  },
+  {
+    id: 'package',
+    imageSource: require('../assets/images/credit-card-icon.png'),
+    title: 'Package Delivery',
+    comingSoon: true,
+  },
+  {
+    id: 'profile',
+    imageSource: require('../assets/images/taxi-driver.png'),
+    title: 'Profile',
     comingSoon: true,
   },
 ];
@@ -98,6 +116,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
 
   const handleServicePress = (service: ServiceItem) => {
     if (service.route && navigation) {
+      // Navigate to enhanced ride booking screen
+      if (service.route === 'BookRide') {
+        navigation.navigate('EnhancedRideBooking');
+        return;
+      }
       navigation.navigate(service.route);
     } else {
       Alert.alert(

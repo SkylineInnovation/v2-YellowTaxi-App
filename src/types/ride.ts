@@ -120,6 +120,88 @@ export type RideStatus =
   | 'completed'
   | 'cancelled';
 
+// Driver-specific types
+export interface Driver {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  avatar?: string;
+  rating: number;
+  totalRides: number;
+  vehicle: VehicleInfo;
+  location: {
+    lat: number;
+    lng: number;
+    bearing?: number;
+    speed?: number;
+    accuracy?: number;
+  };
+  status: DriverStatus;
+  isOnline: boolean;
+  isAvailable: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export type DriverStatus = 'offline' | 'online' | 'busy' | 'break';
+
+export interface DriverRideRequest {
+  id: string;
+  rideId: string;
+  driverId: string;
+  customerId: string;
+  pickup: Location;
+  destination: Location;
+  serviceType: ServiceType;
+  pricing: RidePricing;
+  estimatedDistance: number;
+  estimatedDuration: number;
+  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  expiresAt: Timestamp;
+  createdAt: Timestamp;
+  respondedAt?: Timestamp;
+}
+
+// Real-time location tracking
+export interface LocationUpdate {
+  userId: string;
+  userType: 'customer' | 'driver';
+  location: {
+    lat: number;
+    lng: number;
+    bearing?: number;
+    speed?: number;
+    accuracy?: number;
+  };
+  timestamp: Timestamp;
+  rideId?: string;
+}
+
+// Push notification types
+export interface RideNotification {
+  id: string;
+  userId: string;
+  userType: 'customer' | 'driver';
+  type: NotificationType;
+  title: string;
+  message: string;
+  data?: Record<string, any>;
+  read: boolean;
+  createdAt: Timestamp;
+}
+
+export type NotificationType = 
+  | 'ride_request'
+  | 'ride_accepted'
+  | 'driver_assigned'
+  | 'driver_arriving'
+  | 'driver_arrived'
+  | 'ride_started'
+  | 'ride_completed'
+  | 'ride_cancelled'
+  | 'payment_processed';
+
 export interface NearbyDriver {
   id: string;
   name: string;
@@ -153,6 +235,34 @@ export interface RideState {
   loading: boolean;
   error: string | null;
   trackingEnabled: boolean;
+  userLocation: {
+    lat: number;
+    lng: number;
+    bearing?: number;
+  } | null;
+  mapRegion: MapRegion | null;
+}
+
+// Driver-specific Redux state
+export interface DriverState {
+  profile: Driver | null;
+  currentRide: RideOrder | null;
+  rideRequests: DriverRideRequest[];
+  rideHistory: RideOrder[];
+  isOnline: boolean;
+  isAvailable: boolean;
+  location: {
+    lat: number;
+    lng: number;
+    bearing?: number;
+  } | null;
+  earnings: {
+    today: number;
+    week: number;
+    month: number;
+  };
+  loading: boolean;
+  error: string | null;
 }
 
 // API request/response interfaces

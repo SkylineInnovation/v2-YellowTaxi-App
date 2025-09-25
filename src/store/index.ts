@@ -5,6 +5,7 @@ import { combineReducers } from '@reduxjs/toolkit';
 
 import authReducer from './slices/authSlice';
 import rideReducer from './slices/rideSlice';
+import driverReducer from './slices/driverSlice';
 
 // Persist config
 const persistConfig = {
@@ -17,6 +18,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authReducer,
   ride: rideReducer,
+  driver: driverReducer,
 });
 
 // Persisted reducer
