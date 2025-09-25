@@ -200,6 +200,32 @@ export const BecomeDriverScreen: React.FC<BecomeDriverScreenProps> = ({ navigati
     navigation?.goBack();
   };
 
+  const fillTestData = () => {
+    setFormData({
+      firstName: 'Ahmed',
+      lastName: 'Al-Rashid',
+      email: 'ahmed.alrashid@example.com',
+      phone: '+962791234567',
+      dateOfBirth: '1990-05-15',
+      address: 'King Abdullah II Street, Amman, Jordan',
+      vehicleMake: 'Toyota',
+      vehicleModel: 'Camry',
+      vehicleYear: '2020',
+      vehicleColor: 'White',
+      licensePlate: 'AMN-12345',
+    });
+    
+    // Also mark all documents as uploaded
+    setDocuments({
+      drivingLicense: true,
+      vehicleRegistration: true,
+      insurance: true,
+    });
+    
+    // Clear any existing errors
+    setErrors({});
+  };
+
   const renderInput = (
     field: keyof FormData,
     label: string,
@@ -275,12 +301,24 @@ export const BecomeDriverScreen: React.FC<BecomeDriverScreenProps> = ({ navigati
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={createTextStyle(currentLanguage, styles.title, 'bold')}>
-            {t('driver.application.title')}
-          </Text>
-          <Text style={createTextStyle(currentLanguage, styles.subtitle)}>
-            {t('driver.application.subtitle')}
-          </Text>
+          <View style={[styles.headerContent, isRTL && { flexDirection: 'row-reverse' }]}>
+            <View style={styles.headerText}>
+              <Text style={createTextStyle(currentLanguage, styles.title, 'bold')}>
+                {t('driver.application.title')}
+              </Text>
+              <Text style={createTextStyle(currentLanguage, styles.subtitle)}>
+                {t('driver.application.subtitle')}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.testButton}
+              onPress={fillTestData}
+            >
+              <Text style={createTextStyle(currentLanguage, styles.testButtonText, 'medium')}>
+                Fill Test Data
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Personal Information Section */}
@@ -396,6 +434,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[200],
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  headerText: {
+    flex: 1,
+  },
   title: {
     ...textStyles.h2,
     color: colors.gray[900],
@@ -404,6 +451,20 @@ const styles = StyleSheet.create({
   subtitle: {
     ...textStyles.body1,
     color: colors.gray[600],
+  },
+  testButton: {
+    backgroundColor: colors.secondary[100],
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.secondary[300],
+    minWidth: 100,
+  },
+  testButtonText: {
+    ...textStyles.caption,
+    color: colors.secondary[700],
+    textAlign: 'center',
   },
   section: {
     backgroundColor: colors.white,
