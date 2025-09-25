@@ -349,6 +349,11 @@ The YellowTaxi welcome screen now features a modern, visually appealing service 
 - Location tracking services should be optimized for battery usage and accuracy
 - Navigation type definitions must be updated when adding new screens to avoid TypeScript errors
 - Style arrays in React Native can cause TypeScript issues - use object spread syntax instead
+- Missing image assets cause bundle errors - always verify asset paths before committing
+- Google Maps integration requires proper API key configuration and fallback components
+- Conditional imports with try-catch blocks help prevent crashes when optional dependencies are missing
+- Android permissions for location services must be declared in AndroidManifest.xml
+- Environment configuration files (.env.example) help with API key management and setup
 
 ### Grab-Inspired Welcome Screen Redesign ✅
 - [x] Replace hero section with immersive Unsplash background header
