@@ -153,7 +153,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
               <View style={styles.logoutIcon}>
-                <Text style={styles.logoutIconText}>⏻</Text>
+                <Text style={createTextStyle(currentLanguage, styles.logoutIconText, 'bold')}>
+                  {t('welcome.logout')}
+                </Text>
               </View>
             </TouchableOpacity>
 
@@ -317,9 +319,9 @@ const styles = StyleSheet.create({
   },
 
   logoutIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -329,8 +331,9 @@ const styles = StyleSheet.create({
 
   logoutIconText: {
     color: colors.white,
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 
   headerTitle: {
