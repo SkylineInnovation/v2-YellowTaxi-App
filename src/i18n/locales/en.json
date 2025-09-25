@@ -1,0 +1,140 @@
+{
+  "common": {
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "close": "Close"
+  },
+  "languageSelection": {
+    "title": "Choose Your Language",
+    "subtitle": "Select your preferred language to continue",
+    "english": "English",
+    "arabic": "العربية",
+    "continue": "Continue"
+  },
+  "splash": {
+    "title": "YellowTaxi",
+    "subtitle": "Your ride, your way",
+    "loading": "Loading..."
+  },
+  "auth": {
+    "phoneLogin": {
+      "title": "Welcome to YellowTaxi",
+      "subtitle": "Enter your phone number to get started",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "Enter your phone number",
+      "continue": "Continue",
+      "invalidPhone": "Please enter a valid phone number",
+      "error": "Authentication failed. Please try again."
+    },
+    "otpVerification": {
+      "title": "Verify Your Phone",
+      "subtitle": "We've sent a verification code to",
+      "enterCode": "Enter verification code",
+      "resendCode": "Resend Code",
+      "verify": "Verify",
+      "invalidCode": "Invalid verification code",
+      "codeExpired": "Verification code has expired",
+      "resendSuccess": "Verification code sent successfully"
+    },
+    "profileSetup": {
+      "title": "Complete Your Profile",
+      "subtitle": "Tell us a bit about yourself",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "save": "Save Profile"
+    }
+  },
+  "welcome": {
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "header": {
+      "title": "Explore over 1,000",
+      "subtitle": "rides worldwide",
+      "description": "Exclusively with YellowTaxi Cards"
+    },
+    "search": {
+      "placeholder": "Search the YellowTaxi"
+    },
+    "services": {
+      "rides": "Rides",
+      "orderFoods": "Order Foods",
+      "yellowTaxiCard": "YellowTaxi Card",
+      "becomeDriver": "Become Driver",
+      "comingSoon": "Coming Soon",
+      "comingSoonMessage": "{{service}} feature will be available in the next update!"
+    },
+    "balance": {
+      "balance": "Balance",
+      "usePoints": "Use Points",
+      "applyNow": "Apply now"
+    },
+    "promo": {
+      "headline": "Apply NOW for YellowTaxi Card",
+      "subtext": "Enjoy the Online Payment without Carrying Cash"
+    },
+    "signOut": {
+      "title": "Sign Out",
+      "message": "Are you sure you want to sign out?",
+      "signOut": "Sign Out",
+      "cancel": "Cancel",
+      "error": "Failed to sign out"
+    }
+  },
+  "ride": {
+    "booking": {
+      "title": "Book a Ride",
+      "from": "From",
+      "to": "To",
+      "selectLocation": "Select location",
+      "bookNow": "Book Now",
+      "serviceTypes": {
+        "economy": "Economy",
+        "standard": "Standard",
+        "premium": "Premium"
+      }
+    },
+    "tracking": {
+      "title": "Your Ride",
+      "driverOnWay": "Driver is on the way",
+      "arrived": "Driver has arrived",
+      "inProgress": "Ride in progress",
+      "completed": "Ride completed",
+      "cancelled": "Ride cancelled"
+    }
+  },
+  "driver": {
+    "dashboard": {
+      "title": "Driver Dashboard",
+      "goOnline": "Go Online",
+      "goOffline": "Go Offline",
+      "earnings": {
+        "today": "Today's Earnings",
+        "week": "This Week",
+        "month": "This Month"
+      },
+      "stats": {
+        "totalRides": "Total Rides",
+        "rating": "Rating",
+        "acceptance": "Acceptance Rate"
+      }
+    }
+  }
+}

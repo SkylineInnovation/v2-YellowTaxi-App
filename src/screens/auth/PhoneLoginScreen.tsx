@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 import { Screen, Button, PhoneInput, Logo } from '../../components/ui';
 import { AuthStackParamList } from '../../navigation/types';
@@ -16,6 +17,8 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { sendOTP, clearError } from '../../store/slices/authSlice';
 import { phoneAuthService } from '../../services/auth';
 import { colors, textStyles, spacing } from '../../theme';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { createTextStyle } from '../../utils/fonts';
 
 type PhoneLoginScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -32,6 +35,8 @@ interface Props {
 export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+962');
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
 
   const handleCountryChange = (country: any) => {
     setCountryCode(country.dialCode);
@@ -47,13 +52,13 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSendOTP = async () => {
     if (!phoneNumber.trim()) {
-      Alert.alert('Error', 'Please enter your phone number');
+      Alert.alert(t('common.error'), t('auth.phoneLogin.invalidPhone'));
       return;
     }
 
     // Validate phone number
     if (!phoneAuthService.validatePhoneNumber(phoneNumber, countryCode)) {
-      Alert.alert('Error', 'Invalid phone number format. Please enter a valid phone number.');
+      Alert.alert(t('common.error'), t('auth.phoneLogin.invalidPhone'));
       return;
     }
 
@@ -70,8 +75,8 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
       });
     } catch (error) {
       Alert.alert(
-        'Error',
-        typeof error === 'string' ? error : 'Failed to send OTP. Please try again.'
+        t('common.error'),
+        typeof error === 'string' ? error : t('auth.phoneLogin.error')
       );
     }
   };
@@ -87,31 +92,33 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.header}>
           <Logo size={100} />
-          <Text style={styles.title}>Welcome to YellowTaxi</Text>
-          <Text style={styles.subtitle}>
-            Enter your phone number to get started
+          <Text style={createTextStyle(currentLanguage, styles.title, 'bold')}>
+            {t('auth.phoneLogin.title')}
+          </Text>
+          <Text style={createTextStyle(currentLanguage, styles.subtitle)}>
+            {t('auth.phoneLogin.subtitle')}
           </Text>
         </View>
 
         <View style={styles.form}>
           <PhoneInput
-            label="Phone Number"
+            label={t('auth.phoneLogin.phoneNumber')}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             onChangeCountry={handleCountryChange}
-            placeholder="Enter your phone number"
+            placeholder={t('auth.phoneLogin.phoneNumberPlaceholder')}
             defaultCountry="JO"
             autoFocus
             error={phoneVerification.error || undefined}
           />
 
-          <Text style={styles.disclaimer}>
+          <Text style={createTextStyle(currentLanguage, styles.disclaimer)}>
             By continuing, you agree to our Terms of Service and Privacy Policy.
             We'll send you a verification code via SMS.
           </Text>
 
           <Button
-            title="Send Verification Code"
+            title={t('auth.phoneLogin.continue')}
             onPress={handleSendOTP}
             loading={phoneVerification.loading}
             disabled={!isValidPhone}
@@ -121,7 +128,7 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
+          <Text style={createTextStyle(currentLanguage, styles.footerText)}>
             Need help? Contact our support team
           </Text>
         </View>

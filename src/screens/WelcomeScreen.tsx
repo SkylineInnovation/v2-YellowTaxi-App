@@ -12,11 +12,14 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Screen, Button, Logo, ServiceIcon, SearchBar } from '../components/ui';
 import { useAppDispatch, useAppSelector } from '../store';
 import { signOut } from '../store/slices/authSlice';
 import { colors, textStyles, spacing } from '../theme';
+import { useLanguage } from '../contexts/LanguageContext';
+import { createTextStyle, getTextAlign } from '../utils/fonts';
 
 // Location test disabled to prevent crashes
 // Uncomment to enable location testing:
@@ -38,33 +41,7 @@ interface ServiceItem {
   iconSize?: number;
 }
 
-const services: ServiceItem[] = [
-  {
-    id: 'transport',
-    imageSource: require('../assets/images/yellowtax-icon.png'),
-    title: 'Rides',
-    route: 'BookRide',
-    iconSize: 86,
-  },
-  {
-    id: 'food',
-    imageSource: require('../assets/images/food-icon.png'),
-    title: 'Order Foods',
-    comingSoon: true,
-  },
-  {
-    id: 'mart',
-    imageSource: require('../assets/images/credit-card-icon.png'),
-    title: 'YellowTaxi Card',
-    comingSoon: true,
-  },
-  {
-    id: 'express',
-    imageSource: require('../assets/images/taxi-driver.png'),
-    title: 'Become Driver',
-    route: 'DriverDashboard',
-  },
-];
+// Services will be generated dynamically with translations
 
 interface WelcomeScreenProps {
   navigation?: any;
@@ -73,26 +50,57 @@ interface WelcomeScreenProps {
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
+
+  // Generate services array with translations
+  const services: ServiceItem[] = [
+    {
+      id: 'transport',
+      imageSource: require('../assets/images/yellowtax-icon.png'),
+      title: t('welcome.services.rides'),
+      route: 'BookRide',
+      iconSize: 86,
+    },
+    {
+      id: 'food',
+      imageSource: require('../assets/images/food-icon.png'),
+      title: t('welcome.services.orderFoods'),
+      comingSoon: true,
+    },
+    {
+      id: 'mart',
+      imageSource: require('../assets/images/credit-card-icon.png'),
+      title: t('welcome.services.yellowTaxiCard'),
+      comingSoon: true,
+    },
+    {
+      id: 'express',
+      imageSource: require('../assets/images/taxi-driver.png'),
+      title: t('welcome.services.becomeDriver'),
+      route: 'DriverDashboard',
+    },
+  ];
 
   const handleSignOut = async () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      t('welcome.signOut.title'),
+      t('welcome.signOut.message'),
       [
         {
-          text: 'Cancel',
+          text: t('welcome.signOut.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Sign Out',
+          text: t('welcome.signOut.signOut'),
           style: 'destructive',
           onPress: async () => {
             try {
               await dispatch(signOut()).unwrap();
             } catch (error) {
               Alert.alert(
-                'Error',
-                typeof error === 'string' ? error : 'Failed to sign out'
+                t('common.error'),
+                typeof error === 'string' ? error : t('welcome.signOut.error')
               );
             }
           },
@@ -112,18 +120,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       navigation.navigate(service.route);
     } else {
       Alert.alert(
-        'Coming Soon',
-        `${service.title} feature will be available in the next update!`,
-        [{ text: 'OK' }]
+        t('welcome.services.comingSoon'),
+        t('welcome.services.comingSoonMessage', { service: service.title }),
+        [{ text: t('common.ok') }]
       );
     }
   };
 
   const handleSearchPress = () => {
     Alert.alert(
-      'Search',
-      'Search functionality will be available soon!',
-      [{ text: 'OK' }]
+      t('common.search'),
+      t('welcome.services.comingSoonMessage', { service: t('common.search') }),
+      [{ text: t('common.ok') }]
     );
   };
 
@@ -143,10 +151,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
         >
           <View style={styles.headerOverlay}>
             <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>Explore over 1,000</Text>
-              <Text style={styles.headerTitle}>rides worldwide</Text>
+              <Text style={createTextStyle(currentLanguage, styles.headerTitle, 'bold')}>
+                {t('welcome.header.title')}
+              </Text>
+              <Text style={createTextStyle(currentLanguage, styles.headerTitle, 'bold')}>
+                {t('welcome.header.subtitle')}
+              </Text>
               <View style={styles.headerSubtitleContainer}>
-                <Text style={styles.headerSubtitle}>Exclusively with YellowTaxi Cards</Text>
+                <Text style={createTextStyle(currentLanguage, styles.headerSubtitle)}>
+                  {t('welcome.header.description')}
+                </Text>
                 <TouchableOpacity style={styles.headerArrow}>
                   <Text style={styles.headerArrowText}>→</Text>
                 </TouchableOpacity>
@@ -162,7 +176,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
               <View style={styles.searchIconCircle} />
               <View style={styles.searchIconHandle} />
             </View>
-            <Text style={styles.searchText}>Search the YellowTaxi</Text>
+            <Text style={createTextStyle(currentLanguage, styles.searchText)}>
+              {t('welcome.search.placeholder')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -183,7 +199,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                     resizeMode="contain"
                   />
                 </View>
-                <Text style={styles.serviceTitle}>{service.title}</Text>
+                <Text style={createTextStyle(currentLanguage, styles.serviceTitle, 'medium')}>
+                  {service.title}
+                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -192,9 +210,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
         {/* Balance Section */}
         <View style={styles.balanceSection}>
           <View style={styles.balanceItem}>
-            <Text style={styles.balanceLabel}>Balance</Text>
+            <Text style={createTextStyle(currentLanguage, styles.balanceLabel)}>
+              {t('welcome.balance.balance')}
+            </Text>
             <View style={styles.balanceValueContainer}>
-              <Text style={styles.balanceValue}>$$ 0.00</Text>
+              <Text style={createTextStyle(currentLanguage, styles.balanceValue, 'semiBold')}>
+                $$ 0.00
+              </Text>
               <View style={styles.balanceIcon}>
                 <Text style={styles.balanceIconText}>$</Text>
               </View>
@@ -202,13 +224,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
           </View>
 
           <View style={styles.balanceItem}>
-            <Text style={styles.balanceLabel}>Use Points</Text>
-            <Text style={styles.balanceValue}>4,291</Text>
+            <Text style={createTextStyle(currentLanguage, styles.balanceLabel)}>
+              {t('welcome.balance.usePoints')}
+            </Text>
+            <Text style={createTextStyle(currentLanguage, styles.balanceValue, 'semiBold')}>
+              4,291
+            </Text>
           </View>
         </View>
 
         <TouchableOpacity style={styles.applyNowContainer} activeOpacity={0.8}>
-          <Text style={styles.applyNowText}>Apply now</Text>
+          <Text style={createTextStyle(currentLanguage, styles.applyNowText, 'semiBold')}>
+            {t('welcome.balance.applyNow')}
+          </Text>
           <Text style={styles.applyNowArrow}>→</Text>
         </TouchableOpacity>
 
@@ -220,8 +248,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             resizeMode="cover"
           />
           <View style={styles.promoCopyContainer}>
-            <Text style={styles.promoHeadline}>Apply NOW for YellowTaxi Card</Text>
-            <Text style={styles.promoSubtext}>Enjoy the Online Payment without Carrying Cash</Text>
+            <Text style={createTextStyle(currentLanguage, styles.promoHeadline, 'bold')}>
+              {t('welcome.promo.headline')}
+            </Text>
+            <Text style={createTextStyle(currentLanguage, styles.promoSubtext)}>
+              {t('welcome.promo.subtext')}
+            </Text>
           </View>
         </View>
       </ScrollView>

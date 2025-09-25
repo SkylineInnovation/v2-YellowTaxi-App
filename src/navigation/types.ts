@@ -3,6 +3,7 @@ import { User, UserRole } from '../types/auth';
 
 // Auth Stack
 export type AuthStackParamList = {
+  LanguageSelection: undefined;
   PhoneLogin: undefined;
   OTPVerification: {
     phoneNumber: string;

@@ -1,0 +1,140 @@
+{
+  "common": {
+    "continue": "متابعة",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "ok": "موافق",
+    "yes": "نعم",
+    "no": "لا",
+    "back": "رجوع",
+    "next": "التالي",
+    "done": "تم",
+    "save": "حفظ",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "search": "بحث",
+    "close": "إغلاق"
+  },
+  "languageSelection": {
+    "title": "اختر لغتك",
+    "subtitle": "اختر لغتك المفضلة للمتابعة",
+    "english": "English",
+    "arabic": "العربية",
+    "continue": "متابعة"
+  },
+  "splash": {
+    "title": "يلو تاكسي",
+    "subtitle": "رحلتك، على طريقتك",
+    "loading": "جاري التحميل..."
+  },
+  "auth": {
+    "phoneLogin": {
+      "title": "مرحباً بك في يلو تاكسي",
+      "subtitle": "أدخل رقم هاتفك للبدء",
+      "phoneNumber": "رقم الهاتف",
+      "phoneNumberPlaceholder": "أدخل رقم هاتفك",
+      "continue": "متابعة",
+      "invalidPhone": "يرجى إدخال رقم هاتف صحيح",
+      "error": "فشل في المصادقة. يرجى المحاولة مرة أخرى."
+    },
+    "otpVerification": {
+      "title": "تحقق من هاتفك",
+      "subtitle": "لقد أرسلنا رمز التحقق إلى",
+      "enterCode": "أدخل رمز التحقق",
+      "resendCode": "إعادة إرسال الرمز",
+      "verify": "تحقق",
+      "invalidCode": "رمز التحقق غير صحيح",
+      "codeExpired": "انتهت صلاحية رمز التحقق",
+      "resendSuccess": "تم إرسال رمز التحقق بنجاح"
+    },
+    "profileSetup": {
+      "title": "أكمل ملفك الشخصي",
+      "subtitle": "أخبرنا قليلاً عن نفسك",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "عنوان البريد الإلكتروني",
+      "save": "حفظ الملف الشخصي"
+    }
+  },
+  "welcome": {
+    "greeting": {
+      "morning": "صباح الخير",
+      "afternoon": "مساء الخير",
+      "evening": "مساء الخير"
+    },
+    "header": {
+      "title": "اكتشف أكثر من 1000",
+      "subtitle": "رحلة حول العالم",
+      "description": "حصرياً مع بطاقات يلو تاكسي"
+    },
+    "search": {
+      "placeholder": "ابحث في يلو تاكسي"
+    },
+    "services": {
+      "rides": "الرحلات",
+      "orderFoods": "طلب الطعام",
+      "yellowTaxiCard": "بطاقة يلو تاكسي",
+      "becomeDriver": "كن سائقاً",
+      "comingSoon": "قريباً",
+      "comingSoonMessage": "ميزة {{service}} ستكون متاحة في التحديث القادم!"
+    },
+    "balance": {
+      "balance": "الرصيد",
+      "usePoints": "استخدم النقاط",
+      "applyNow": "تقدم الآن"
+    },
+    "promo": {
+      "headline": "تقدم الآن للحصول على بطاقة يلو تاكسي",
+      "subtext": "استمتع بالدفع الإلكتروني دون حمل النقود"
+    },
+    "signOut": {
+      "title": "تسجيل الخروج",
+      "message": "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
+      "signOut": "تسجيل الخروج",
+      "cancel": "إلغاء",
+      "error": "فشل في تسجيل الخروج"
+    }
+  },
+  "ride": {
+    "booking": {
+      "title": "احجز رحلة",
+      "from": "من",
+      "to": "إلى",
+      "selectLocation": "اختر الموقع",
+      "bookNow": "احجز الآن",
+      "serviceTypes": {
+        "economy": "اقتصادي",
+        "standard": "عادي",
+        "premium": "مميز"
+      }
+    },
+    "tracking": {
+      "title": "رحلتك",
+      "driverOnWay": "السائق في الطريق",
+      "arrived": "وصل السائق",
+      "inProgress": "الرحلة جارية",
+      "completed": "اكتملت الرحلة",
+      "cancelled": "تم إلغاء الرحلة"
+    }
+  },
+  "driver": {
+    "dashboard": {
+      "title": "لوحة السائق",
+      "goOnline": "اتصل",
+      "goOffline": "اقطع الاتصال",
+      "earnings": {
+        "today": "أرباح اليوم",
+        "week": "هذا الأسبوع",
+        "month": "هذا الشهر"
+      },
+      "stats": {
+        "totalRides": "إجمالي الرحلات",
+        "rating": "التقييم",
+        "acceptance": "معدل القبول"
+      }
+    }
+  }
+}
