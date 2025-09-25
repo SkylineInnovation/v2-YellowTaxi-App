@@ -302,7 +302,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.gray[50],
+    backgroundColor: '#fff',
   },
 
   scrollContainer: {
@@ -486,8 +486,8 @@ const styles = StyleSheet.create({
 
   gradientCircle: {
     position: 'absolute',
-    width: 72,
-    height: 72,
+    width: 55,
+    height: 55,
     borderRadius: 36,
     backgroundColor: colors.primary[400],
     shadowColor: colors.primary[500],
