@@ -7,12 +7,17 @@ import {
   RoleSelectionScreen,
   ProfileSetupScreen,
 } from '../screens/auth';
+import { LanguageSelectionScreen } from '../screens/LanguageSelectionScreen';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
 export const AuthNavigator: React.FC = () => {
+  const { isLanguageSelected } = useLanguage();
+
   return (
     <Stack.Navigator
+      initialRouteName={isLanguageSelected ? "PhoneLogin" : "LanguageSelection"}
       screenOptions={{
         headerShown: false,
         gestureEnabled: true,
@@ -32,6 +37,14 @@ export const AuthNavigator: React.FC = () => {
         },
       }}
     >
+      <Stack.Screen 
+        name="LanguageSelection" 
+        component={LanguageSelectionScreen}
+        options={{
+          title: 'Select Language',
+          gestureEnabled: false, // Prevent going back from language selection
+        }}
+      />
       <Stack.Screen 
         name="PhoneLogin" 
         component={PhoneLoginScreen}

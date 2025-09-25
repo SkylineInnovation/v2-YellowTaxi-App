@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/ElMessiri-Bold.ttf",
+      "sha1": "ce246dae226769a291a8ea63bdfcdec7a1a8f233"
+    },
+    {
+      "path": "src/assets/fonts/ElMessiri-Medium.ttf",
+      "sha1": "ee1df9a0758320a493260629e86635a12490dbaf"
+    },
+    {
+      "path": "src/assets/fonts/ElMessiri-Regular.ttf",
+      "sha1": "e14fed0370e49038e271b9021190b9ba03329edd"
+    },
+    {
+      "path": "src/assets/fonts/ElMessiri-SemiBold.ttf",
+      "sha1": "4aa7e7e941825daba82c133e063a22de4075f965"
+    }
+  ]
+}
