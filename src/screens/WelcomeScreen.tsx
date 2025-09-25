@@ -66,7 +66,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       id: 'mart',
       imageSource: require('../assets/images/credit-card-icon.png'),
       title: t('welcome.services.yellowTaxiCard'),
-      comingSoon: true,
+      route: 'ApplyCard',
     },
     {
       id: 'express',

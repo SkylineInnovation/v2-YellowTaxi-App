@@ -34,6 +34,7 @@ export type CustomerTabParamList = {
   EnhancedRideTracking: undefined;
   DriverDashboard: undefined;
   BecomeDriver: undefined;
+  ApplyCard: undefined;
   RideHistory: undefined;
   Profile: undefined;
 };
