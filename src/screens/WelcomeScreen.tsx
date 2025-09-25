@@ -56,6 +56,18 @@ const services: ServiceItem[] = [
     id: 'express',
     imageSource: require('../assets/images/taxi-driver.png'),
     title: 'Become Driver',
+    route: 'DriverDashboard',
+  },
+  {
+    id: 'package',
+    imageSource: require('../assets/images/package-icon.png'),
+    title: 'Package Delivery',
+    comingSoon: true,
+  },
+  {
+    id: 'profile',
+    imageSource: require('../assets/images/profile-icon.png'),
+    title: 'Profile',
     comingSoon: true,
   },
 ];
@@ -98,6 +110,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
 
   const handleServicePress = (service: ServiceItem) => {
     if (service.route && navigation) {
+      // Navigate to enhanced ride booking screen
+      if (service.route === 'BookRide') {
+        navigation.navigate('EnhancedRideBooking');
+        return;
+      }
       navigation.navigate(service.route);
     } else {
       Alert.alert(

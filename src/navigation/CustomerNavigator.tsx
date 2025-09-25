@@ -3,6 +3,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { CustomerTabParamList } from './types';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { RideBookingScreen, RideTrackingScreen } from '../screens/ride';
+import EnhancedRideBookingScreen from '../screens/ride/EnhancedRideBookingScreen';
+import EnhancedRideTrackingScreen from '../screens/ride/EnhancedRideTrackingScreen';
+import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import { colors } from '../theme';
 
 const Stack = createStackNavigator<CustomerTabParamList>();
@@ -44,12 +47,35 @@ export const CustomerNavigator: React.FC = () => {
         }}
       />
       <Stack.Screen
+        name="EnhancedRideBooking"
+        component={EnhancedRideBookingScreen}
+        options={{
+          title: 'Book Your Ride',
+        }}
+      />
+      <Stack.Screen
         name="RideTracking"
         component={RideTrackingScreen}
         options={{
           title: 'Track Your Ride',
           headerLeft: () => null, // Prevent going back during active ride
           gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="EnhancedRideTracking"
+        component={EnhancedRideTrackingScreen}
+        options={{
+          title: 'Track Your Ride',
+          headerLeft: () => null,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="DriverDashboard"
+        component={DriverDashboardScreen}
+        options={{
+          title: 'Driver Dashboard',
         }}
       />
       <Stack.Screen

@@ -1,4 +1,4 @@
-// Ride service for React Native mobile app
+// Enhanced ride service for React Native mobile app with real-time tracking
 import {
   firebaseFirestore,
   FieldValue,
@@ -15,7 +15,12 @@ import {
   RidePricing,
   NearbyDriver,
   RideEstimate,
+  Driver,
+  DriverRideRequest,
+  RideStatus,
 } from '../types/ride';
+import { locationService } from './locationService';
+import { notificationService } from './notificationService';
 
 class RideService {
   private static instance: RideService;
@@ -23,6 +28,7 @@ class RideService {
   private readonly ORDERS_COLLECTION = 'orders';
   private readonly DRIVERS_COLLECTION = 'drivers';
   private readonly USERS_COLLECTION = 'users';
+  private readonly DRIVER_REQUESTS_COLLECTION = 'driver_ride_requests';
 
   static getInstance(): RideService {
     if (!RideService.instance) {
@@ -88,7 +94,7 @@ class RideService {
     };
   }
 
-  // Create a new ride request
+  // Create a new ride request with driver matching
   async createRideRequest(requestData: CreateRideRequestData): Promise<string> {
     try {
       if (!isFirebaseConfigured()) {
@@ -107,44 +113,174 @@ class RideService {
 
       const customer = customerDoc.data();
       const now = FieldValue.serverTimestamp();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-      // Calculate pricing
+      // Calculate pricing and route details
       const distance = this.calculateDistance(
         requestData.pickup.coordinates,
         requestData.destination.coordinates
       );
       const pricing = this.calculatePricing(distance, requestData.serviceType);
+      
+      // Get route details from Google Directions API
+      const routeDetails = await locationService.getDirections(
+        requestData.pickup.coordinates,
+        requestData.destination.coordinates
+      );
 
-      const rideRequest: Omit<RideRequest, 'id'> = {
+      // Create the main ride order
+      const rideOrder: Omit<RideOrder, 'id'> = {
         customerId: requestData.customerId,
         pickup: requestData.pickup,
         destination: requestData.destination,
         serviceType: requestData.serviceType,
         paymentMethod: requestData.paymentMethod,
         notes: requestData.notes,
-        status: 'pending',
+        status: 'searching',
         pricing,
+        timeline: [{
+          status: 'pending',
+          timestamp: now as any,
+          notes: 'Ride request created',
+        }, {
+          status: 'searching',
+          timestamp: now as any,
+          notes: 'Searching for nearby drivers',
+        }],
+        tracking: {
+          realTimeEnabled: true,
+          route: routeDetails ? {
+            distance: routeDetails.distance,
+            duration: routeDetails.duration,
+            polyline: routeDetails.polyline,
+          } : undefined,
+        },
         createdAt: now as any,
-        expiresAt: FieldValue.serverTimestamp() as any,
+        updatedAt: now as any,
       };
 
-      // Create the ride request document
-      const docRef = await firebaseFirestore
-        .collection(this.RIDE_REQUESTS_COLLECTION)
-        .add(rideRequest);
+      // Create the ride order document
+      const orderRef = await firebaseFirestore
+        .collection(this.ORDERS_COLLECTION)
+        .add(rideOrder);
 
-      // Update with the document ID and expiration time
-      await docRef.update({
-        id: docRef.id,
-        expiresAt: FieldValue.serverTimestamp(),
-      });
+      // Find and notify nearby drivers
+      await this.findAndNotifyNearbyDrivers(
+        orderRef.id,
+        requestData.pickup,
+        requestData.destination,
+        requestData.serviceType,
+        pricing,
+        distance,
+        routeDetails?.duration || Math.ceil(distance * 2)
+      );
 
-      console.log('Ride request created:', docRef.id);
-      return docRef.id;
+      console.log('Ride request created and drivers notified:', orderRef.id);
+      return orderRef.id;
     } catch (error) {
       console.error('Error creating ride request:', error);
       throw error;
+    }
+  }
+
+  // Find and notify nearby drivers
+  private async findAndNotifyNearbyDrivers(
+    rideId: string,
+    pickup: Location,
+    destination: Location,
+    serviceType: ServiceType,
+    pricing: RidePricing,
+    estimatedDistance: number,
+    estimatedDuration: number
+  ): Promise<void> {
+    try {
+      // Find nearby available drivers (within 10km radius)
+      const nearbyDrivers = await this.findNearbyDrivers(pickup.coordinates, 10);
+      
+      if (nearbyDrivers.length === 0) {
+        console.log('No nearby drivers found');
+        return;
+      }
+
+      const batch = firebaseFirestore.batch();
+      const now = FieldValue.serverTimestamp();
+      const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes to respond
+
+      // Create driver ride requests for nearby drivers
+      for (const driver of nearbyDrivers.slice(0, 5)) { // Limit to 5 drivers
+        const driverRequest: Omit<DriverRideRequest, 'id'> = {
+          rideId,
+          driverId: driver.id,
+          customerId: pickup.address.split(',')[0], // Extract customer ID from context
+          pickup,
+          destination,
+          serviceType,
+          pricing,
+          estimatedDistance,
+          estimatedDuration,
+          status: 'pending',
+          expiresAt: expiresAt as any,
+          createdAt: now as any,
+        };
+
+        const requestRef = firebaseFirestore
+          .collection(this.DRIVER_REQUESTS_COLLECTION)
+          .doc();
+        
+        batch.set(requestRef, driverRequest);
+
+        // Send notification to driver
+        await notificationService.sendRideRequestNotification(
+          driver.id,
+          rideId,
+          pickup.address,
+          destination.address
+        );
+      }
+
+      await batch.commit();
+      console.log(`Notified ${nearbyDrivers.length} nearby drivers`);
+    } catch (error) {
+      console.error('Error finding and notifying nearby drivers:', error);
+    }
+  }
+
+  // Find nearby available drivers
+  private async findNearbyDrivers(
+    location: { lat: number; lng: number },
+    radiusKm: number = 10
+  ): Promise<Driver[]> {
+    try {
+      // In a production app, you would use geospatial queries
+      // For now, we'll get all online drivers and filter by distance
+      const snapshot = await firebaseFirestore
+        .collection(this.DRIVERS_COLLECTION)
+        .where('isOnline', '==', true)
+        .where('isAvailable', '==', true)
+        .where('status', '==', 'online')
+        .get();
+
+      const nearbyDrivers: Driver[] = [];
+      
+      snapshot.forEach((doc) => {
+        const driver = { id: doc.id, ...doc.data() } as Driver;
+        const distance = this.calculateDistance(location, driver.location);
+        
+        if (distance <= radiusKm) {
+          nearbyDrivers.push(driver);
+        }
+      });
+
+      // Sort by distance
+      nearbyDrivers.sort((a, b) => {
+        const distanceA = this.calculateDistance(location, a.location);
+        const distanceB = this.calculateDistance(location, b.location);
+        return distanceA - distanceB;
+      });
+
+      return nearbyDrivers;
+    } catch (error) {
+      console.error('Error finding nearby drivers:', error);
+      return [];
     }
   }
 
@@ -211,62 +347,84 @@ class RideService {
     return unsubscribe;
   }
 
-  // Subscribe to customer's ride orders
+  // Subscribe to customer's current ride
+  subscribeToCustomerCurrentRide(
+    customerId: string,
+    callback: (ride: RideOrder | null) => void
+  ): () => void {
+    const unsubscribe = firebaseFirestore
+      .collection(this.ORDERS_COLLECTION)
+      .where('customerId', '==', customerId)
+      .where('status', 'in', ['searching', 'assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress'])
+      .onSnapshot(
+        (snapshot) => {
+          if (snapshot.empty) {
+            callback(null);
+            return;
+          }
+
+          const doc = snapshot.docs[0]; // Get the first active ride
+          const data = doc.data();
+          
+          const order: RideOrder = {
+            id: doc.id,
+            customerId: data.customerId,
+            driverId: data.driverId,
+            pickup: data.pickup,
+            destination: data.destination,
+            serviceType: data.serviceType,
+            paymentMethod: data.paymentMethod,
+            status: data.status,
+            pricing: data.pricing,
+            driver: data.driver,
+            tracking: data.tracking,
+            timeline: data.timeline || [],
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+            completedAt: data.completedAt,
+            notes: data.notes,
+          };
+          
+          callback(order);
+        },
+        (error) => {
+          console.error('Error subscribing to customer current ride:', error);
+        }
+      );
+
+    return unsubscribe;
+  }
+
+  // Subscribe to customer's ride orders (history)
   subscribeToCustomerRideOrders(
     customerId: string,
     callback: (orders: RideOrder[]) => void
   ): () => void {
     const unsubscribe = firebaseFirestore
       .collection(this.ORDERS_COLLECTION)
-      .where('customer.id', '==', customerId)
-      .orderBy('metadata.createdAt', 'desc')
+      .where('customerId', '==', customerId)
+      .orderBy('createdAt', 'desc')
       .onSnapshot(
         (snapshot) => {
           const orders: RideOrder[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data();
-            // Transform Firestore document to RideOrder format
             const order: RideOrder = {
               id: doc.id,
-              customerId: data.customer.id,
-              driverId: data.driver?.id,
-              pickup: {
-                address: data.locations.pickup.address,
-                coordinates: {
-                  lat: data.locations.pickup.coordinates.latitude,
-                  lng: data.locations.pickup.coordinates.longitude,
-                },
-                placeId: data.locations.pickup.placeId,
-              },
-              destination: {
-                address: data.locations.destination.address,
-                coordinates: {
-                  lat: data.locations.destination.coordinates.latitude,
-                  lng: data.locations.destination.coordinates.longitude,
-                },
-                placeId: data.locations.destination.placeId,
-              },
-              serviceType: data.service.type,
-              paymentMethod: data.payment.method,
-              status: data.status.current,
+              customerId: data.customerId,
+              driverId: data.driverId,
+              pickup: data.pickup,
+              destination: data.destination,
+              serviceType: data.serviceType,
+              paymentMethod: data.paymentMethod,
+              status: data.status,
               pricing: data.pricing,
-              driver: data.driver ? {
-                id: data.driver.id,
-                name: data.driver.name,
-                phone: data.driver.phone,
-                avatar: data.driver.avatar,
-                rating: data.driver.rating || 5.0,
-                vehicle: data.driver.vehicle,
-                location: {
-                  lat: data.driver.location.latitude,
-                  lng: data.driver.location.longitude,
-                },
-                bearing: data.driver.bearing,
-              } : undefined,
-              timeline: data.status.timeline || [],
-              createdAt: data.metadata.createdAt,
-              updatedAt: data.metadata.updatedAt,
-              completedAt: data.metadata.completedAt,
+              driver: data.driver,
+              tracking: data.tracking,
+              timeline: data.timeline || [],
+              createdAt: data.createdAt,
+              updatedAt: data.updatedAt,
+              completedAt: data.completedAt,
               notes: data.notes,
             };
             orders.push(order);
@@ -281,76 +439,199 @@ class RideService {
     return unsubscribe;
   }
 
-  // Get nearby drivers (mock implementation for now)
+  // Get nearby drivers for display on map
   async getNearbyDrivers(location: Location, radius: number = 5): Promise<NearbyDriver[]> {
     try {
-      // In a real implementation, this would query drivers within a certain radius
-      // For now, return mock data
-      const mockDrivers: NearbyDriver[] = [
-        {
-          id: 'driver1',
-          name: 'Ahmed Ali',
+      const drivers = await this.findNearbyDrivers(location.coordinates, radius);
+      
+      return drivers.map(driver => {
+        const distance = this.calculateDistance(location.coordinates, driver.location);
+        const estimatedArrival = Math.ceil(distance * 2); // Rough estimate: 2 minutes per km
+        
+        return {
+          id: driver.id,
+          name: driver.name,
           location: {
-            lat: location.coordinates.lat + 0.001,
-            lng: location.coordinates.lng + 0.001,
+            lat: driver.location.lat,
+            lng: driver.location.lng,
           },
-          bearing: 45,
-          distance: 0.5,
-          estimatedArrival: 3,
-          rating: 4.8,
-          vehicle: {
-            make: 'Toyota',
-            model: 'Camry',
-            year: 2020,
-            color: 'White',
-            plateNumber: 'ABC-123',
-          },
-          isOnline: true,
-          isAvailable: true,
-        },
-        {
-          id: 'driver2',
-          name: 'Mohammad Hassan',
-          location: {
-            lat: location.coordinates.lat - 0.002,
-            lng: location.coordinates.lng + 0.003,
-          },
-          bearing: 180,
-          distance: 1.2,
-          estimatedArrival: 5,
-          rating: 4.9,
-          vehicle: {
-            make: 'Hyundai',
-            model: 'Elantra',
-            year: 2019,
-            color: 'Black',
-            plateNumber: 'XYZ-789',
-          },
-          isOnline: true,
-          isAvailable: true,
-        },
-      ];
-
-      return mockDrivers;
+          bearing: driver.location.bearing || 0,
+          distance,
+          estimatedArrival,
+          rating: driver.rating,
+          vehicle: driver.vehicle,
+          isOnline: driver.isOnline,
+          isAvailable: driver.isAvailable,
+        };
+      });
     } catch (error) {
       console.error('Error getting nearby drivers:', error);
       throw error;
     }
   }
 
-  // Get ride estimates for different service types
+  // Update ride status with notifications
+  async updateRideStatus(
+    rideId: string,
+    status: RideStatus,
+    userId?: string,
+    userType?: 'customer' | 'driver',
+    location?: { lat: number; lng: number },
+    notes?: string
+  ): Promise<void> {
+    try {
+      const now = FieldValue.serverTimestamp();
+      
+      // Update the ride order
+      const updateData: any = {
+        status,
+        updatedAt: now,
+        'timeline': FieldValue.arrayUnion({
+          status,
+          timestamp: now,
+          notes,
+          location,
+        }),
+      };
+
+      if (status === 'completed') {
+        updateData.completedAt = now;
+      }
+
+      await firebaseFirestore
+        .collection(this.ORDERS_COLLECTION)
+        .doc(rideId)
+        .update(updateData);
+
+      // Get ride details for notifications
+      const rideDoc = await firebaseFirestore
+        .collection(this.ORDERS_COLLECTION)
+        .doc(rideId)
+        .get();
+
+      if (!rideDoc.exists) {
+        throw new Error('Ride not found');
+      }
+
+      const rideData = rideDoc.data();
+      const customerId = rideData?.customerId;
+      const driverId = rideData?.driverId;
+      const driverName = rideData?.driver?.name;
+
+      // Send appropriate notifications based on status
+      switch (status) {
+        case 'assigned':
+          if (customerId && driverName) {
+            await notificationService.sendRideAcceptedNotification(
+              customerId,
+              rideId,
+              driverName,
+              5 // Estimated arrival time
+            );
+          }
+          break;
+        
+        case 'driver_arriving':
+          if (customerId && driverName) {
+            await notificationService.sendDriverArrivingNotification(
+              customerId,
+              rideId,
+              driverName
+            );
+          }
+          break;
+        
+        case 'driver_arrived':
+          if (customerId && driverName) {
+            await notificationService.sendDriverArrivedNotification(
+              customerId,
+              rideId,
+              driverName
+            );
+          }
+          break;
+        
+        case 'picked_up':
+        case 'in_progress':
+          if (customerId) {
+            await notificationService.sendRideStartedNotification(
+              customerId,
+              rideId,
+              rideData?.destination?.address || 'your destination'
+            );
+          }
+          break;
+        
+        case 'completed':
+          if (customerId) {
+            await notificationService.sendRideCompletedNotification(
+              customerId,
+              'customer',
+              rideId,
+              rideData?.pricing?.total
+            );
+          }
+          if (driverId) {
+            await notificationService.sendRideCompletedNotification(
+              driverId,
+              'driver',
+              rideId
+            );
+          }
+          break;
+        
+        case 'cancelled':
+          if (customerId) {
+            await notificationService.sendRideCancelledNotification(
+              customerId,
+              'customer',
+              rideId,
+              notes
+            );
+          }
+          if (driverId) {
+            await notificationService.sendRideCancelledNotification(
+              driverId,
+              'driver',
+              rideId,
+              notes
+            );
+          }
+          break;
+      }
+
+      console.log('Ride status updated:', rideId, status);
+    } catch (error) {
+      console.error('Error updating ride status:', error);
+      throw error;
+    }
+  }
+
+  // Get ride estimates for different service types with real driver data
   async getRideEstimates(pickup: Location, destination: Location): Promise<RideEstimate[]> {
     try {
       const distance = this.calculateDistance(pickup.coordinates, destination.coordinates);
       const serviceTypes: ServiceType[] = ['economy', 'standard', 'premium'];
+      
+      // Get nearby drivers to calculate realistic estimates
+      const nearbyDrivers = await this.getNearbyDrivers(pickup, 10);
 
       const estimates: RideEstimate[] = serviceTypes.map((serviceType) => {
         const pricing = this.calculatePricing(distance, serviceType);
+        const availableDriversForType = nearbyDrivers.filter(driver => 
+          // In a real app, you might filter drivers by service type capability
+          driver.isAvailable
+        ).length;
+        
+        const estimatedPickupTime = nearbyDrivers.length > 0 
+          ? Math.min(...nearbyDrivers.map(d => d.estimatedArrival))
+          : Math.ceil(Math.random() * 10) + 5; // 5-15 minutes if no drivers
+
         return {
           serviceType,
           pricing,
-          estimatedPickupTime: Math.ceil(Math.random() * 10) + 2, // 2-12 minutes
-          availableDrivers: Math.ceil(Math.random() * 5) + 1, // 1-6 drivers
+          estimatedPickupTime,
+          availableDrivers: availableDriversForType,
         };
       });
 
@@ -360,6 +641,22 @@ class RideService {
       throw error;
     }
   }
+
+  // Cancel ride
+  async cancelRide(rideId: string, userId: string, userType: 'customer' | 'driver', reason?: string): Promise<void> {
+    try {
+      await this.updateRideStatus(rideId, 'cancelled', userId, userType, undefined, reason);
+      console.log('Ride cancelled:', rideId);
+    } catch (error) {
+      console.error('Error cancelling ride:', error);
+      throw error;
+    }
+  }
 }
 
 export const rideService = RideService.getInstance();
+
+// Export enhanced ride service with all new functionality
+export { locationService } from './locationService';
+export { driverService } from './driverService';
+export { notificationService } from './notificationService';

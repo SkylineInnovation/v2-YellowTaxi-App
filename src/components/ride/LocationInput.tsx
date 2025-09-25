@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Location, LocationSearchResult, LocationSearchSuggestion } from '../../types/ride';
 import { colors, textStyles, spacing } from '../../theme';
+import { locationService, GooglePlacesResult } from '../../services/locationService';
 
 interface LocationInputProps {
   placeholder: string;
@@ -36,10 +37,49 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     setInputText(value?.address || '');
   }, [value]);
 
-  // Mock location search function
+  // Get current location for better search results
+  const getCurrentLocation = async (): Promise<{ lat: number; lng: number } | null> => {
+    try {
+      return await locationService.getCurrentLocation();
+    } catch (error) {
+      console.error('Error getting current location:', error);
+      return null;
+    }
+  };
+
+  // Search locations using Google Places API with fallback to mock data
   const searchLocations = async (query: string): Promise<LocationSearchSuggestion[]> => {
-    // In a real app, this would integrate with Google Places API or similar
-    // For now, return mock suggestions based on common Amman locations
+    try {
+      // Get current location for better search results
+      const currentLocation = await getCurrentLocation();
+      
+      // Search using Google Places API
+      const placesResults = await locationService.searchPlaces(query, currentLocation || undefined);
+      
+      if (placesResults.length > 0) {
+        // Convert Google Places results to LocationSearchSuggestion format
+        const suggestions: LocationSearchSuggestion[] = [];
+        
+        for (const place of placesResults.slice(0, 5)) {
+          const location = await locationService.convertPlaceToLocation(place);
+          if (location) {
+            suggestions.push({
+              id: place.place_id,
+              title: place.structured_formatting.main_text,
+              subtitle: place.structured_formatting.secondary_text,
+              location,
+              type: 'search',
+            });
+          }
+        }
+        
+        return suggestions;
+      }
+    } catch (error) {
+      console.error('Error searching with Google Places:', error);
+    }
+
+    // Fallback to mock suggestions based on common Amman locations
     const mockSuggestions: LocationSearchSuggestion[] = [
       {
         id: '1',

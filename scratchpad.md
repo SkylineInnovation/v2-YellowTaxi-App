@@ -343,6 +343,12 @@ The YellowTaxi welcome screen now features a modern, visually appealing service 
 - Firestore composite queries (where + orderBy on different fields) require explicit index creation
 - Service icons grid layout provides better visual organization than vertical action cards
 - Reusable UI components should follow consistent design patterns and TypeScript interfaces
+- Real-time ride-booking systems require careful state management and service architecture
+- Google Maps integration needs proper API key configuration and permission handling
+- Driver-customer communication flows require separate Redux slices and service layers
+- Location tracking services should be optimized for battery usage and accuracy
+- Navigation type definitions must be updated when adding new screens to avoid TypeScript errors
+- Style arrays in React Native can cause TypeScript issues - use object spread syntax instead
 
 ### Grab-Inspired Welcome Screen Redesign ✅
 - [x] Replace hero section with immersive Unsplash background header
