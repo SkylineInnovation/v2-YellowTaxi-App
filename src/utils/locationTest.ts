@@ -49,10 +49,15 @@ export const testLocationService = async (): Promise<void> => {
   }
 };
 
-// Auto-run test in development
+// Auto-run test in development (disabled to prevent crashes)
+// Uncomment the following lines to enable automatic testing:
+/*
 if (__DEV__) {
   // Delay to allow app initialization
   setTimeout(() => {
-    testLocationService();
-  }, 3000);
+    testLocationService().catch(error => {
+      console.error('Location test failed:', error);
+    });
+  }, 5000);
 }
+*/

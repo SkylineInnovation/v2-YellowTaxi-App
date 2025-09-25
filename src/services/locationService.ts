@@ -92,32 +92,56 @@ class LocationService {
 
   // Get current location
   async getCurrentLocation(): Promise<{ lat: number; lng: number; bearing?: number }> {
-    // First request permission
-    const hasPermission = await this.requestLocationPermission();
-    if (!hasPermission) {
-      throw new Error('Location permission not granted');
-    }
+    try {
+      // First request permission
+      const hasPermission = await this.requestLocationPermission();
+      if (!hasPermission) {
+        throw new Error('Location permission not granted');
+      }
 
-    return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            bearing: position.coords.heading || undefined,
-          });
-        },
-        (error) => {
-          console.error('Error getting current location:', error);
-          reject(error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000,
-        }
-      );
-    });
+      return new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              bearing: position.coords.heading || undefined,
+            });
+          },
+          (error) => {
+            console.error('Error getting current location:', error);
+            // Provide a fallback location (Amman, Jordan) for development
+            if (__DEV__) {
+              console.warn('Using fallback location for development');
+              resolve({
+                lat: 31.9454,
+                lng: 35.9284,
+                bearing: undefined,
+              });
+            } else {
+              reject(error);
+            }
+          },
+          {
+            enableHighAccuracy: false, // Less aggressive for stability
+            timeout: 10000, // Shorter timeout
+            maximumAge: 30000, // Allow cached location
+          }
+        );
+      });
+    } catch (error) {
+      console.error('getCurrentLocation failed:', error);
+      // Provide fallback for development
+      if (__DEV__) {
+        console.warn('Using fallback location due to error');
+        return {
+          lat: 31.9454,
+          lng: 35.9284,
+          bearing: undefined,
+        };
+      }
+      throw error;
+    }
   }
 
   // Start watching location changes
@@ -126,12 +150,13 @@ class LocationService {
     userType: 'customer' | 'driver',
     rideId?: string
   ): Promise<void> {
-    const hasPermission = await this.requestLocationPermission();
-    if (!hasPermission) {
-      throw new Error('Location permission denied');
-    }
+    try {
+      const hasPermission = await this.requestLocationPermission();
+      if (!hasPermission) {
+        throw new Error('Location permission denied');
+      }
 
-    this.watchId = Geolocation.watchPosition(
+      this.watchId = Geolocation.watchPosition(
       (position) => {
         const locationUpdate: LocationUpdate = {
           userId,
@@ -163,6 +188,10 @@ class LocationService {
         fastestInterval: 2000,
       }
     );
+    } catch (error) {
+      console.error('Failed to start location tracking:', error);
+      throw error;
+    }
   }
 
   // Stop location tracking

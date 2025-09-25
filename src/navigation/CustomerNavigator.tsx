@@ -4,6 +4,7 @@ import { CustomerTabParamList } from './types';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { RideBookingScreen, RideTrackingScreen } from '../screens/ride';
 import EnhancedRideBookingScreen from '../screens/ride/EnhancedRideBookingScreen';
+import SimpleRideBookingScreen from '../screens/ride/SimpleRideBookingScreen';
 import EnhancedRideTrackingScreen from '../screens/ride/EnhancedRideTrackingScreen';
 import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import { colors } from '../theme';
@@ -48,7 +49,7 @@ export const CustomerNavigator: React.FC = () => {
       />
       <Stack.Screen
         name="EnhancedRideBooking"
-        component={EnhancedRideBookingScreen}
+        component={SimpleRideBookingScreen}
         options={{
           title: 'Book Your Ride',
         }}

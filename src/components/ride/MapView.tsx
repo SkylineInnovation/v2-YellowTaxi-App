@@ -1,17 +1,7 @@
 // MapView component with Google Maps integration
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
-// Conditional import for development
-let MapView: any, Marker: any, Polyline: any, PROVIDER_GOOGLE: any;
-try {
-  const maps = require('react-native-maps');
-  MapView = maps.default;
-  Marker = maps.Marker;
-  Polyline = maps.Polyline;
-  PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
-} catch (error) {
-  console.warn('react-native-maps not available, using fallback');
-}
+import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { MapRegion, MapMarker, Location, DriverInfo } from '../../types/ride';
 import { colors } from '../../theme';
 import { locationService } from '../../services/locationService';
@@ -119,32 +109,42 @@ export const RideMapView: React.FC<RideMapViewProps> = ({
     }
   };
 
-  // Fallback component when Maps is not available
-  if (!MapView) {
-    return (
-      <View style={[styles.container, styles.fallback, style]}>
-        <Text style={styles.fallbackText}>Map not available</Text>
-        <Text style={styles.fallbackSubtext}>Google Maps configuration required</Text>
-      </View>
-    );
-  }
+  // Initialize map region when component mounts
+  useEffect(() => {
+    if (mapRef.current && markers.length > 1) {
+      // Fit to markers after a short delay to ensure map is ready
+      setTimeout(() => {
+        fitToMarkers();
+      }, 1000);
+    }
+  }, [markers]);
 
   return (
     <View style={[styles.container, style]}>
       <MapView
         ref={mapRef}
-        provider={PROVIDER_GOOGLE}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         style={styles.map}
+        initialRegion={region}
         region={region}
         onRegionChangeComplete={onRegionChange}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
+        showsUserLocation={false} // Disable to avoid permission issues
+        showsMyLocationButton={false}
         showsCompass={true}
-        showsScale={true}
+        showsScale={false}
         mapType="standard"
         loadingEnabled={true}
         loadingIndicatorColor={colors.primary[500]}
         loadingBackgroundColor={colors.white}
+        zoomEnabled={true}
+        scrollEnabled={true}
+        pitchEnabled={true}
+        rotateEnabled={true}
+        cacheEnabled={true}
+        moveOnMarkerPress={false}
+        showsPointsOfInterests={true}
+        showsBuildings={true}
+        showsTraffic={false}
       >
         {/* Regular markers */}
         {markers.map((marker) => (
