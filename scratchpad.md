@@ -354,6 +354,10 @@ The YellowTaxi welcome screen now features a modern, visually appealing service 
 - Conditional imports with try-catch blocks help prevent crashes when optional dependencies are missing
 - Android permissions for location services must be declared in AndroidManifest.xml
 - Environment configuration files (.env.example) help with API key management and setup
+- Firestore composite indexes are required for complex queries with multiple where clauses
+- Firebase CLI requires proper account authentication and project selection before deployment
+- Index deployment can take several minutes depending on collection size
+- Security rules must be deployed alongside indexes to protect data access
 
 ### Grab-Inspired Welcome Screen Redesign ✅
 - [x] Replace hero section with immersive Unsplash background header
