@@ -24,7 +24,8 @@ const CardInfoScreen: React.FC = () => {
 
   // Mock user data - in real app this would come from user context/API
   const cardData = {
-    balance: 1250.75,
+    balance: 50.00,
+    currency: 'JOD',
     points: 3420,
     cardName: 'YellowTaxi Gold Card',
     cliqName: 'SHQ1983',
@@ -119,10 +120,10 @@ const CardInfoScreen: React.FC = () => {
         </Text>
         <Text style={[
           styles.balanceAmount,
-          createTextStyle(currentLanguage, { fontSize: 32 }, 'bold'),
+          createTextStyle(currentLanguage, { fontSize: 24 }, 'bold'),
           { textAlign: getTextAlign(currentLanguage) }
         ]}>
-          ${cardData.balance.toFixed(2)}
+          {cardData.balance.toFixed(2)} {cardData.currency}
         </Text>
       </View>
 
