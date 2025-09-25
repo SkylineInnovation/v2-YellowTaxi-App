@@ -301,24 +301,12 @@ export const BecomeDriverScreen: React.FC<BecomeDriverScreenProps> = ({ navigati
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={[styles.headerContent, isRTL && { flexDirection: 'row-reverse' }]}>
-            <View style={styles.headerText}>
-              <Text style={createTextStyle(currentLanguage, styles.title, 'bold')}>
-                {t('driver.application.title')}
-              </Text>
-              <Text style={createTextStyle(currentLanguage, styles.subtitle)}>
-                {t('driver.application.subtitle')}
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.testButton}
-              onPress={fillTestData}
-            >
-              <Text style={createTextStyle(currentLanguage, styles.testButtonText, 'medium')}>
-                Fill Test Data
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={createTextStyle(currentLanguage, styles.title, 'bold')}>
+            {t('driver.application.title')}
+          </Text>
+          <Text style={createTextStyle(currentLanguage, styles.subtitle)}>
+            {t('driver.application.subtitle')}
+          </Text>
         </View>
 
         {/* Personal Information Section */}
@@ -384,6 +372,16 @@ export const BecomeDriverScreen: React.FC<BecomeDriverScreenProps> = ({ navigati
             </Text>
           )}
         </TouchableOpacity>
+
+        {/* Test Button */}
+        <TouchableOpacity
+          style={styles.testButton}
+          onPress={fillTestData}
+        >
+          <Text style={createTextStyle(currentLanguage, styles.testButtonText, 'medium')}>
+            Fill Test Data
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Success Modal */}
@@ -434,15 +432,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[200],
   },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-  },
-  headerText: {
-    flex: 1,
-  },
   title: {
     ...textStyles.h2,
     color: colors.gray[900],
@@ -453,17 +442,17 @@ const styles = StyleSheet.create({
     color: colors.gray[600],
   },
   testButton: {
-    backgroundColor: colors.secondary[100],
-    paddingHorizontal: spacing.md,
+    backgroundColor: colors.gray[100],
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.secondary[300],
-    minWidth: 100,
+    borderColor: colors.gray[300],
   },
   testButtonText: {
-    ...textStyles.caption,
-    color: colors.secondary[700],
+    ...textStyles.body2,
+    color: colors.gray[600],
     textAlign: 'center',
   },
   section: {
