@@ -89,7 +89,13 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    // Provide default values during app initialization
+    return {
+      currentLanguage: 'en',
+      isRTL: false,
+      changeLanguage: async () => {},
+      isLanguageSelected: false,
+    };
   }
   return context;
 };

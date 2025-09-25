@@ -13,6 +13,10 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		ACA6054C0A96A437FA56ADDB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		F3D8F7612E7F4468001FFF3E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F3D8F7602E7F4468001FFF3E /* GoogleService-Info.plist */; };
+		34DE993E93734EF5BC1556FF /* ElMessiri-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C551EBA92D884BF28EF156EE /* ElMessiri-Bold.ttf */; };
+		754DE1D07FD9438A98515D60 /* ElMessiri-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 378A23E5452E427B8EEC6A27 /* ElMessiri-Medium.ttf */; };
+		3C9F60DD48D04CD4887E7161 /* ElMessiri-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCB6BC7C40874D05A7967AFE /* ElMessiri-Regular.ttf */; };
+		C5C7113053134363B7166B84 /* ElMessiri-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 17B97D51333B43058DA5ADC7 /* ElMessiri-SemiBold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +31,10 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = yellowtaxiapp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F3D8F7602E7F4468001FFF3E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C551EBA92D884BF28EF156EE /* ElMessiri-Bold.ttf */ = {isa = PBXFileReference; name = "ElMessiri-Bold.ttf"; path = "../src/assets/fonts/ElMessiri-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		378A23E5452E427B8EEC6A27 /* ElMessiri-Medium.ttf */ = {isa = PBXFileReference; name = "ElMessiri-Medium.ttf"; path = "../src/assets/fonts/ElMessiri-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DCB6BC7C40874D05A7967AFE /* ElMessiri-Regular.ttf */ = {isa = PBXFileReference; name = "ElMessiri-Regular.ttf"; path = "../src/assets/fonts/ElMessiri-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		17B97D51333B43058DA5ADC7 /* ElMessiri-SemiBold.ttf */ = {isa = PBXFileReference; name = "ElMessiri-SemiBold.ttf"; path = "../src/assets/fonts/ElMessiri-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +86,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				15D5864ED64349ECBEB7A224 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -100,6 +109,18 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		15D5864ED64349ECBEB7A224 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				C551EBA92D884BF28EF156EE /* ElMessiri-Bold.ttf */,
+				378A23E5452E427B8EEC6A27 /* ElMessiri-Medium.ttf */,
+				DCB6BC7C40874D05A7967AFE /* ElMessiri-Regular.ttf */,
+				17B97D51333B43058DA5ADC7 /* ElMessiri-SemiBold.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -165,6 +186,10 @@
 				F3D8F7612E7F4468001FFF3E /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				ACA6054C0A96A437FA56ADDB /* PrivacyInfo.xcprivacy in Resources */,
+				34DE993E93734EF5BC1556FF /* ElMessiri-Bold.ttf in Resources */,
+				754DE1D07FD9438A98515D60 /* ElMessiri-Medium.ttf in Resources */,
+				3C9F60DD48D04CD4887E7161 /* ElMessiri-Regular.ttf in Resources */,
+				C5C7113053134363B7166B84 /* ElMessiri-SemiBold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

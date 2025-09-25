@@ -32,7 +32,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>RCTNewArchEnabled</key>
 	<false/>
 	<key>UILaunchStoryboardName</key>
@@ -49,5 +49,12 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>ElMessiri-Bold.ttf</string>
+		<string>ElMessiri-Medium.ttf</string>
+		<string>ElMessiri-Regular.ttf</string>
+		<string>ElMessiri-SemiBold.ttf</string>
+	</array>
 </dict>
 </plist>
