@@ -66,7 +66,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       id: 'mart',
       imageSource: require('../assets/images/credit-card-icon.png'),
       title: t('welcome.services.yellowTaxiCard'),
-      route: 'ApplyCard',
+      route: 'CardInfo',
     },
     {
       id: 'express',
@@ -261,6 +261,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             isRTL && { flexDirection: 'row-reverse' }
           ]} 
           activeOpacity={0.8}
+          onPress={() => navigation?.navigate('ApplyCard')}
         >
           <Text style={createTextStyle(currentLanguage, styles.applyNowText, 'semiBold')}>
             {t('welcome.balance.applyNow')}

@@ -241,6 +241,19 @@
         "monthlyIncomeRequired": "Monthly income is required",
         "monthlyIncomeInvalid": "Please enter a valid monthly income amount"
       }
+    },
+    "info": {
+      "title": "My YellowTaxi Card",
+      "subtitle": "Manage your card balance, points, and transactions",
+      "currentBalance": "Current Balance",
+      "rewardPoints": "Reward Points",
+      "cliqInfo": "Cliq Information",
+      "cliqName": "Cliq Name",
+      "cardHolder": "Card Holder",
+      "expires": "Expires",
+      "topUp": "Top Up Balance",
+      "transactionHistory": "Transaction History",
+      "applyForCard": "Apply for Card"
     }
   }
 }

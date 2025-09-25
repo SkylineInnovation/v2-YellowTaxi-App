@@ -241,6 +241,19 @@
         "monthlyIncomeRequired": "الدخل الشهري مطلوب",
         "monthlyIncomeInvalid": "يرجى إدخال مبلغ دخل شهري صحيح"
       }
+    },
+    "info": {
+      "title": "بطاقة يلو تاكسي الخاصة بي",
+      "subtitle": "إدارة رصيد البطاقة والنقاط والمعاملات",
+      "currentBalance": "الرصيد الحالي",
+      "rewardPoints": "نقاط المكافآت",
+      "cliqInfo": "معلومات كليك",
+      "cliqName": "اسم كليك",
+      "cardHolder": "حامل البطاقة",
+      "expires": "تنتهي في",
+      "topUp": "شحن الرصيد",
+      "transactionHistory": "تاريخ المعاملات",
+      "applyForCard": "تقدم للبطاقة"
     }
   }
 }
