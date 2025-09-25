@@ -35,7 +35,7 @@ export interface GooglePlaceDetails {
 class LocationService {
   private static instance: LocationService;
   private watchId: number | null = null;
-  private googleApiKey: string = 'YOUR_GOOGLE_PLACES_API_KEY'; // Replace with actual API key
+  private googleApiKey: string = 'AIzaSyDyfbLegHVXSwjhSvKeC3aYjwhV5mOifqw'; // Google Places API key
   private locationUpdateCallbacks: ((location: LocationUpdate) => void)[] = [];
 
   static getInstance(): LocationService {
@@ -45,15 +45,37 @@ class LocationService {
     return LocationService.instance;
   }
 
+  // Check if location permissions are already granted
+  async hasLocationPermission(): Promise<boolean> {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+        );
+        return granted;
+      }
+      return true; // iOS permissions are handled in Info.plist
+    } catch (error) {
+      console.error('Error checking location permission:', error);
+      return false;
+    }
+  }
+
   // Request location permissions
   async requestLocationPermission(): Promise<boolean> {
     try {
+      // First check if we already have permission
+      const hasPermission = await this.hasLocationPermission();
+      if (hasPermission) {
+        return true;
+      }
+
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
             title: 'YellowTaxi Location Permission',
-            message: 'YellowTaxi needs access to your location to provide ride services',
+            message: 'YellowTaxi needs access to your location to provide ride services and find nearby drivers.',
             buttonNeutral: 'Ask Me Later',
             buttonNegative: 'Cancel',
             buttonPositive: 'OK',
@@ -70,6 +92,12 @@ class LocationService {
 
   // Get current location
   async getCurrentLocation(): Promise<{ lat: number; lng: number; bearing?: number }> {
+    // First request permission
+    const hasPermission = await this.requestLocationPermission();
+    if (!hasPermission) {
+      throw new Error('Location permission not granted');
+    }
+
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
         (position) => {
