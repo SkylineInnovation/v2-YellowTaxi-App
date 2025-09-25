@@ -96,7 +96,8 @@
       "signOut": "Sign Out",
       "cancel": "Cancel",
       "error": "Failed to sign out"
-    }
+    },
+    "logout": "Logout"
   },
   "ride": {
     "booking": {

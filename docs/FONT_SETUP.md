@@ -75,7 +75,34 @@ After adding the fonts:
 4. Test on both iOS and Android devices
 
 ## Troubleshooting
-- If fonts don't appear, try cleaning the build cache
-- Ensure font file names match exactly in the configuration
-- Check that fonts are properly linked in both platforms
-- Restart Metro bundler after adding fonts
+
+### Common Issues:
+
+1. **Bold Arabic text shows system font instead of El Messiri Bold:**
+   - Ensure font files are properly linked with `npx react-native-asset`
+   - Check that font family names match platform requirements
+   - For iOS: Use base family name "El Messiri" with fontWeight
+   - For Android: Use specific font file names "ElMessiri-Bold"
+
+2. **Fonts not appearing:**
+   - Clean build cache: `npx react-native start --reset-cache`
+   - Rebuild the app completely
+   - Ensure font file names match exactly in the configuration
+
+3. **Font linking issues:**
+   - Run `npx react-native-asset` to re-link fonts
+   - Check that fonts are copied to native projects
+   - Restart Metro bundler after adding fonts
+
+### Debug Font Issues:
+Enable debug logging in development to see which fonts are being selected:
+```javascript
+// In development, check console logs for font selection info
+console.log('Font debugging enabled in utils/fonts.ts');
+```
+
+### Platform-Specific Notes:
+- **iOS**: Uses base font family name with fontWeight property
+- **Android**: Uses specific font file names for each weight
+- Font files should be in `src/assets/fonts/` directory
+- Font names are case-sensitive

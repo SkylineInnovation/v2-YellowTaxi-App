@@ -150,6 +150,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
           imageStyle={styles.headerBackgroundImage}
         >
           <View style={styles.headerOverlay}>
+            {/* Logout Button */}
+            <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
+              <View style={styles.logoutIcon}>
+                <Text style={styles.logoutIconText}>⏻</Text>
+              </View>
+            </TouchableOpacity>
+
             <View style={styles.headerContent}>
               <Text style={createTextStyle(currentLanguage, styles.headerTitle, 'bold')}>
                 {t('welcome.header.title')}
@@ -300,6 +307,30 @@ const styles = StyleSheet.create({
 
   headerContent: {
     flex: 1,
+  },
+
+  logoutButton: {
+    position: 'absolute',
+    top: 50,
+    right: spacing.lg,
+    zIndex: 10,
+  },
+
+  logoutIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+
+  logoutIconText: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 
   headerTitle: {
