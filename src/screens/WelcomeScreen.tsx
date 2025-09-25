@@ -72,7 +72,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       id: 'express',
       imageSource: require('../assets/images/taxi-driver.png'),
       title: t('welcome.services.becomeDriver'),
-      route: 'DriverDashboard',
+      route: 'BecomeDriver',
     },
   ];
 

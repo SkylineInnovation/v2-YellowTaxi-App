@@ -7,6 +7,7 @@ import EnhancedRideBookingScreen from '../screens/ride/EnhancedRideBookingScreen
 import SimpleRideBookingScreen from '../screens/ride/SimpleRideBookingScreen';
 import EnhancedRideTrackingScreen from '../screens/ride/EnhancedRideTrackingScreen';
 import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
+import BecomeDriverScreen from '../screens/driver/BecomeDriverScreen';
 import { colors } from '../theme';
 
 const Stack = createStackNavigator<CustomerTabParamList>();
@@ -77,6 +78,13 @@ export const CustomerNavigator: React.FC = () => {
         component={DriverDashboardScreen}
         options={{
           title: 'Driver Dashboard',
+        }}
+      />
+      <Stack.Screen
+        name="BecomeDriver"
+        component={BecomeDriverScreen}
+        options={{
+          title: 'Become a Driver',
         }}
       />
       <Stack.Screen
