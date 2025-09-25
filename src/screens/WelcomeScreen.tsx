@@ -64,18 +64,6 @@ const services: ServiceItem[] = [
     title: 'Become Driver',
     route: 'DriverDashboard',
   },
-  {
-    id: 'package',
-    imageSource: require('../assets/images/credit-card-icon.png'),
-    title: 'Package Delivery',
-    comingSoon: true,
-  },
-  {
-    id: 'profile',
-    imageSource: require('../assets/images/taxi-driver.png'),
-    title: 'Profile',
-    comingSoon: true,
-  },
 ];
 
 interface WelcomeScreenProps {
