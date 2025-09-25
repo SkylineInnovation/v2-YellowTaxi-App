@@ -18,6 +18,11 @@ import { useAppDispatch, useAppSelector } from '../store';
 import { signOut } from '../store/slices/authSlice';
 import { colors, textStyles, spacing } from '../theme';
 
+// Import location test for development
+if (__DEV__) {
+  require('../utils/locationTest');
+}
+
 const { width } = Dimensions.get('window');
 
 // Service icons data
