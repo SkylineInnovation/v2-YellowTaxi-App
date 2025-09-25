@@ -60,13 +60,13 @@ const services: ServiceItem[] = [
   },
   {
     id: 'package',
-    imageSource: require('../assets/images/package-icon.png'),
+    imageSource: require('../assets/images/credit-card-icon.png'),
     title: 'Package Delivery',
     comingSoon: true,
   },
   {
     id: 'profile',
-    imageSource: require('../assets/images/profile-icon.png'),
+    imageSource: require('../assets/images/taxi-driver.png'),
     title: 'Profile',
     comingSoon: true,
   },

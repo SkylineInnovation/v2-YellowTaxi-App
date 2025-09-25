@@ -1,7 +1,17 @@
 // MapView component with Google Maps integration
 import React, { useRef, useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { View, Text, StyleSheet, Alert } from 'react-native';
+// Conditional import for development
+let MapView: any, Marker: any, Polyline: any, PROVIDER_GOOGLE: any;
+try {
+  const maps = require('react-native-maps');
+  MapView = maps.default;
+  Marker = maps.Marker;
+  Polyline = maps.Polyline;
+  PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+} catch (error) {
+  console.warn('react-native-maps not available, using fallback');
+}
 import { MapRegion, MapMarker, Location, DriverInfo } from '../../types/ride';
 import { colors } from '../../theme';
 import { locationService } from '../../services/locationService';
@@ -29,7 +39,7 @@ export const RideMapView: React.FC<RideMapViewProps> = ({
   onMarkerPress,
   style,
 }) => {
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<{ latitude: number; longitude: number }[]>([]);
 
   // Fetch route when pickup and destination are available
@@ -108,6 +118,16 @@ export const RideMapView: React.FC<RideMapViewProps> = ({
         return marker.title || 'Location';
     }
   };
+
+  // Fallback component when Maps is not available
+  if (!MapView) {
+    return (
+      <View style={[styles.container, styles.fallback, style]}>
+        <Text style={styles.fallbackText}>Map not available</Text>
+        <Text style={styles.fallbackSubtext}>Google Maps configuration required</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, style]}>
@@ -198,6 +218,22 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  fallback: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+  },
+  fallbackText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.gray[700],
+    marginBottom: 8,
+  },
+  fallbackSubtext: {
+    fontSize: 14,
+    color: colors.gray[500],
+    textAlign: 'center',
   },
 });
 
