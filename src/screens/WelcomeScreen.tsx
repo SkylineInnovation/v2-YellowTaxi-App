@@ -63,12 +63,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       iconSize: 86,
     },
     {
-      id: 'food',
-      imageSource: require('../assets/images/food-icon.png'),
-      title: t('welcome.services.orderFoods'),
-      comingSoon: true,
-    },
-    {
       id: 'mart',
       imageSource: require('../assets/images/credit-card-icon.png'),
       title: t('welcome.services.yellowTaxiCard'),
