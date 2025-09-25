@@ -237,10 +237,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
               isRTL && { flexDirection: 'row-reverse' }
             ]}>
               <Text style={createTextStyle(currentLanguage, styles.balanceValue, 'semiBold')}>
-                $$ 0.00
+                0.00 JOD
               </Text>
               <View style={styles.balanceIcon}>
-                <Text style={styles.balanceIconText}>$</Text>
+                <Text style={styles.balanceIconText}>د.أ</Text>
               </View>
             </View>
           </View>
@@ -551,17 +551,18 @@ const styles = StyleSheet.create({
   },
 
   balanceIcon: {
-    width: 20,
+    minWidth: 24,
     height: 20,
     borderRadius: 10,
     backgroundColor: colors.primary[500],
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 4,
   },
 
   balanceIconText: {
     color: colors.white,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
   },
 
