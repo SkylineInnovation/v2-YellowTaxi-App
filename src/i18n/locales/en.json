@@ -195,5 +195,65 @@
         "documentsRequired": "All required documents must be uploaded"
       }
     }
+  },
+  "card": {
+    "application": {
+      "title": "Apply for YellowTaxi Card",
+      "subtitle": "Complete the form below to apply for your YellowTaxi Card and enjoy cashless payments",
+      "personalInfo": "Personal Information",
+      "financialInfo": "Financial Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "dateOfBirth": "Date of Birth",
+      "nationalId": "National ID Number",
+      "address": "Full Address",
+      "employmentStatus": "Employment Status",
+      "monthlyIncome": "Monthly Income",
+      "employmentOptions": {
+        "employed": "Employed",
+        "selfEmployed": "Self-Employed",
+        "student": "Student",
+        "retired": "Retired",
+        "unemployed": "Unemployed"
+      },
+      "termsText": "By submitting this application, you agree to our Terms and Conditions and Privacy Policy. Your information will be used to process your YellowTaxi Card application and may be shared with our banking partners for verification purposes.",
+      "submit": "Submit Application",
+      "submitting": "Submitting...",
+      "submitError": "Failed to submit application. Please try again.",
+      "success": {
+        "title": "Application Submitted Successfully!",
+        "message": "Thank you for applying for a YellowTaxi Card. We have received your application and will review it within 3-5 business days. You will receive an email notification with the status of your application.",
+        "backToHome": "Back to Home"
+      },
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Please enter a valid phone number",
+        "dateOfBirthRequired": "Date of birth is required",
+        "nationalIdRequired": "National ID number is required",
+        "addressRequired": "Full address is required",
+        "employmentStatusRequired": "Employment status is required",
+        "monthlyIncomeRequired": "Monthly income is required",
+        "monthlyIncomeInvalid": "Please enter a valid monthly income amount"
+      }
+    },
+    "info": {
+      "title": "My YellowTaxi Card",
+      "subtitle": "Manage your card balance, points, and transactions",
+      "currentBalance": "Current Balance",
+      "rewardPoints": "Reward Points",
+      "cliqInfo": "Cliq Information",
+      "cliqName": "Cliq Name",
+      "cardHolder": "Card Holder",
+      "expires": "Expires",
+      "topUp": "Top Up Balance",
+      "transactionHistory": "Transaction History",
+      "applyForCard": "Apply for Card"
+    }
   }
 }
