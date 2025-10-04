@@ -1,9 +1,23 @@
-// Enhanced ride service for React Native mobile app with real-time tracking
+// Enhanced ride service for Expo mobile app with real-time tracking
 import {
   firebaseFirestore,
   FieldValue,
   isFirebaseConfigured,
 } from '../config/firebase';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  limit as firestoreLimit,
+  onSnapshot,
+  writeBatch,
+} from 'firebase/firestore';
 import {
   RideRequest,
   RideOrder,
@@ -102,12 +116,10 @@ class RideService {
       }
 
       // Get customer information
-      const customerDoc = await firebaseFirestore
-        .collection(this.USERS_COLLECTION)
-        .doc(requestData.customerId)
-        .get();
+      const customerDocRef = doc(firebaseFirestore, this.USERS_COLLECTION, requestData.customerId);
+      const customerDoc = await getDoc(customerDocRef);
 
-      if (!customerDoc.exists) {
+      if (!customerDoc.exists()) {
         throw new Error('Customer not found');
       }
 

@@ -18,16 +18,14 @@ import {
 } from 'firebase/firestore';
 
 // Firebase configuration
-// TODO: Replace with your actual Firebase config from Firebase Console
-// You can find this in Project Settings > General > Your apps > SDK setup and configuration
+// Configuration extracted from google-services.json
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyBV99Kd9kmI7p_E11HG_lC4vIKPvjqKZ_I",
+  authDomain: "yellowtaxi-rides.firebaseapp.com",
+  projectId: "yellowtaxi-rides",
+  storageBucket: "yellowtaxi-rides.firebasestorage.app",
+  messagingSenderId: "926847755164",
+  appId: "1:926847755164:android:bc7677ccd2366aed529e59"
 };
 
 // Initialize Firebase
