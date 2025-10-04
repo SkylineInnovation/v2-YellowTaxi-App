@@ -115,15 +115,26 @@ class FirebaseAuthService {
     try {
       const userDocRef = doc(firebaseFirestore, 'users', user.uid);
 
-      const userData = {
+      // Build user data object, filtering out undefined values
+      const userData: any = {
         uid: user.uid,
-        phoneNumber: user.phoneNumber,
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
         updatedAt: FieldValue.serverTimestamp(),
-        ...additionalData,
       };
+
+      // Only add fields that are not undefined
+      if (user.phoneNumber) userData.phoneNumber = user.phoneNumber;
+      if (user.displayName) userData.displayName = user.displayName;
+      if (user.email) userData.email = user.email;
+      if (user.photoURL) userData.photoURL = user.photoURL;
+
+      // Add additional data if provided
+      if (additionalData) {
+        Object.keys(additionalData).forEach(key => {
+          if (additionalData[key] !== undefined) {
+            userData[key] = additionalData[key];
+          }
+        });
+      }
 
       // Check if user document exists
       const userDoc = await getDoc(userDocRef);

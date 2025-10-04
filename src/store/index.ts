@@ -38,6 +38,15 @@ export const store = configureStore({
           'persist/PURGE',
           'persist/REGISTER',
         ],
+        // Ignore these paths in the state for serialization checks
+        ignoredPaths: [
+          'ride.currentRide.pickupLocation',
+          'ride.currentRide.dropoffLocation',
+          'ride.currentRide.driverLocation',
+          'driver.currentLocation',
+          'driver.currentRide.pickupLocation',
+          'driver.currentRide.dropoffLocation',
+        ],
       },
     }),
   devTools: __DEV__,
