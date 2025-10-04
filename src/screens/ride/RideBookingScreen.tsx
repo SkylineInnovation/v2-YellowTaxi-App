@@ -249,59 +249,59 @@ export const RideBookingScreen: React.FC<RideBookingScreenProps> = ({ navigation
       {/* Full Screen Map */}
       {!mapLoading && (
         <RideMapView
-        region={mapRegion}
-        markers={getMapMarkers()}
-        pickup={pickupLocation ? {
-          address: pickupAddress,
-          coordinates: pickupLocation,
-        } : undefined}
-        destination={destinationLocation ? {
-          address: destinationAddress,
-          coordinates: destinationLocation,
-        } : undefined}
-        showRoute={pickupLocation && destinationLocation ? true : false}
-        onRegionChange={setMapRegion}
-        style={styles.map}
-      />
+          region={mapRegion}
+          markers={getMapMarkers()}
+          pickup={pickupLocation ? {
+            address: pickupAddress,
+            coordinates: pickupLocation,
+          } : undefined}
+          destination={destinationLocation ? {
+            address: destinationAddress,
+            coordinates: destinationLocation,
+          } : undefined}
+          showRoute={pickupLocation && destinationLocation ? true : false}
+          onRegionChange={setMapRegion}
+          style={styles.map}
+        />
       )}
 
       {/* Location Input Panel */}
       {!mapLoading && (
         <View style={styles.inputPanel}>
-        {/* Pickup Input */}
-        <GooglePlacesAutocomplete
-          placeholder="Enter pickup location"
-          value={pickupAddress}
-          onChangeText={setPickupAddress}
-          onPlaceSelected={selectPickupPlace}
-          leftIcon={<View style={styles.locationDot} />}
-          rightIcon={<Text style={styles.currentLocationText}>📍</Text>}
-          onRightIconPress={handleUseCurrentLocation}
-          containerStyle={styles.autocompleteContainer}
-        />
+          {/* Pickup Input */}
+          <GooglePlacesAutocomplete
+            placeholder="Enter pickup location"
+            value={pickupAddress}
+            onChangeText={setPickupAddress}
+            onPlaceSelected={selectPickupPlace}
+            leftIcon={<View style={styles.locationDot} />}
+            rightIcon={<Text style={styles.currentLocationText}>📍</Text>}
+            onRightIconPress={handleUseCurrentLocation}
+            containerStyle={styles.autocompleteContainer}
+          />
 
-        {/* Destination Input */}
-        <GooglePlacesAutocomplete
-          placeholder="Enter destination"
-          value={destinationAddress}
-          onChangeText={setDestinationAddress}
-          onPlaceSelected={selectDestinationPlace}
-          leftIcon={<View style={[styles.locationDot, { backgroundColor: colors.error[500] }]} />}
-          containerStyle={[styles.autocompleteContainer, { marginTop: spacing.sm }]}
-        />
-      </View>
+          {/* Destination Input */}
+          <GooglePlacesAutocomplete
+            placeholder="Enter destination"
+            value={destinationAddress}
+            onChangeText={setDestinationAddress}
+            onPlaceSelected={selectDestinationPlace}
+            leftIcon={<View style={[styles.locationDot, { backgroundColor: colors.error[500] }]} />}
+            containerStyle={[styles.autocompleteContainer, { marginTop: spacing.sm }]}
+          />
+        </View>
       )}
 
       {/* Book Ride Button */}
       {!mapLoading && (
         <View style={styles.bottomPanel}>
-        <Button
-          title={loading ? "Booking Ride..." : "Book Ride"}
-          onPress={handleBookRide}
-          disabled={loading || !pickupAddress.trim() || !destinationAddress.trim()}
-          style={styles.bookButton}
-        />
-      </View>
+          <Button
+            title={loading ? "Booking Ride..." : "Book Ride"}
+            onPress={handleBookRide}
+            disabled={loading || !pickupAddress.trim() || !destinationAddress.trim()}
+            style={styles.bookButton}
+          />
+        </View>
       )}
     </SafeAreaView>
   );
