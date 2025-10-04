@@ -1,6 +1,6 @@
 // MapView component with Google Maps integration
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, Platform, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { MapRegion, MapMarker, Location, DriverInfo } from '../../types/ride';
 import { colors } from '../../theme';
@@ -142,7 +142,7 @@ export const RideMapView: React.FC<RideMapViewProps> = ({
         rotateEnabled={true}
         cacheEnabled={true}
         moveOnMarkerPress={false}
-        showsPointsOfInterests={true}
+        showsPointsOfInterest={true}
         showsBuildings={true}
         showsTraffic={false}
       >

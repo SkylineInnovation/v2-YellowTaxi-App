@@ -29,7 +29,6 @@ export type AppStackParamList = {
 export type CustomerTabParamList = {
   RideBooking: undefined;
   BookRide: undefined;
-  EnhancedRideBooking: undefined;
   RideTracking: undefined;
   EnhancedRideTracking: undefined;
   DriverDashboard: undefined;

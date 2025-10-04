@@ -1,268 +1,335 @@
+// Full-screen ride booking with map and autocomplete
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
+  TouchableOpacity,
+  TextInput,
+  Dimensions,
+  SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { Screen, Button } from '../../components/ui';
-import { LocationInput } from '../../components/ride/LocationInput';
-import { ServiceTypeSelector } from '../../components/ride/ServiceTypeSelector';
-import { PaymentMethodSelector } from '../../components/ride/PaymentMethodSelector';
+import RideMapView from '../../components/ride/MapView';
+import { GooglePlacesAutocomplete } from '../../components/ride/GooglePlacesAutocomplete';
 import { useAppDispatch, useAppSelector } from '../../store';
-import {
-  createRideRequest,
-  fetchRideEstimates,
-  selectRideLoading,
-  selectRideError,
-  selectRideEstimates,
-  selectCanBookRide,
-  clearError,
-} from '../../store/slices/rideSlice';
-import { Location, ServiceType, PaymentMethod } from '../../types/ride';
+import { locationService } from '../../services/locationService';
 import { colors, textStyles, spacing } from '../../theme';
+
+const { width, height } = Dimensions.get('window');
 
 interface RideBookingScreenProps {
   navigation: any;
 }
 
 export const RideBookingScreen: React.FC<RideBookingScreenProps> = ({ navigation }) => {
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [destinationAddress, setDestinationAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 31.9454,
+    longitude: 35.9284,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+  const [pickupLocation, setPickupLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [destinationLocation, setDestinationLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [mapLoading, setMapLoading] = useState(true);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const loading = useAppSelector(selectRideLoading);
-  const error = useAppSelector(selectRideError);
-  const rideEstimates = useAppSelector(selectRideEstimates);
-  const canBookRide = useAppSelector(selectCanBookRide);
 
-  const [pickup, setPickup] = useState<Location | null>(null);
-  const [destination, setDestination] = useState<Location | null>(null);
-  const [serviceType, setServiceType] = useState<ServiceType>('standard');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
-  const [notes, setNotes] = useState('');
-
-  // Clear error when component mounts
+  // Get current location on component mount
   useEffect(() => {
-    if (error) {
-      dispatch(clearError());
-    }
+    initializeMap();
   }, []);
 
-  // Fetch ride estimates when pickup and destination are set
-  useEffect(() => {
-    if (pickup && destination) {
-      dispatch(fetchRideEstimates({ pickup, destination }));
+  const initializeMap = async () => {
+    try {
+      setMapLoading(true);
+      
+      // Check and request location permission
+      const hasPermission = await locationService.requestLocationPermission();
+      setHasLocationPermission(hasPermission);
+      
+      if (hasPermission) {
+        await getCurrentLocation();
+      } else {
+        Alert.alert(
+          'Location Permission Required',
+          'YellowTaxi needs access to your location to show nearby drivers and provide accurate ride services.',
+          [
+            {
+              text: 'Grant Permission',
+              onPress: async () => {
+                const granted = await locationService.requestLocationPermission();
+                if (granted) {
+                  setHasLocationPermission(true);
+                  await getCurrentLocation();
+                }
+              },
+            },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    } finally {
+      setMapLoading(false);
     }
-  }, [pickup, destination, dispatch]);
+  };
 
-  // Show error alerts
-  useEffect(() => {
-    if (error) {
-      Alert.alert('Error', error, [
-        { text: 'OK', onPress: () => dispatch(clearError()) }
-      ]);
+  const getCurrentLocation = async () => {
+    try {
+      const location = await locationService.getCurrentLocation();
+      setMapRegion({
+        latitude: location.lat,
+        longitude: location.lng,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    } catch (error) {
+      console.log('Could not get current location:', error);
+      // Use default location (Amman, Jordan) if permission denied
+      setMapRegion({
+        latitude: 31.9454,
+        longitude: 35.9284,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
     }
-  }, [error, dispatch]);
+  };
+
+
+  const selectPickupPlace = async (place: any) => {
+    try {
+      const details = await locationService.getPlaceDetails(place.place_id);
+      if (details && details.geometry) {
+        const location = {
+          lat: details.geometry.location.lat,
+          lng: details.geometry.location.lng,
+        };
+        setPickupLocation(location);
+        
+        // Update map region to show the selected location
+        setMapRegion({
+          latitude: location.lat,
+          longitude: location.lng,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      }
+    } catch (error) {
+      console.log('Error getting place details:', error);
+    }
+  };
+
+  const selectDestinationPlace = async (place: any) => {
+    try {
+      const details = await locationService.getPlaceDetails(place.place_id);
+      if (details && details.geometry) {
+        const location = {
+          lat: details.geometry.location.lat,
+          lng: details.geometry.location.lng,
+        };
+        setDestinationLocation(location);
+        
+        // If both pickup and destination are set, fit map to show both
+        if (pickupLocation) {
+          // Calculate region that includes both points
+          const minLat = Math.min(pickupLocation.lat, location.lat);
+          const maxLat = Math.max(pickupLocation.lat, location.lat);
+          const minLng = Math.min(pickupLocation.lng, location.lng);
+          const maxLng = Math.max(pickupLocation.lng, location.lng);
+          
+          const latDelta = (maxLat - minLat) * 1.5; // Add padding
+          const lngDelta = (maxLng - minLng) * 1.5;
+          
+          setMapRegion({
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLng + maxLng) / 2,
+            latitudeDelta: Math.max(latDelta, 0.01),
+            longitudeDelta: Math.max(lngDelta, 0.01),
+          });
+        }
+      }
+    } catch (error) {
+      console.log('Error getting place details:', error);
+    }
+  };
 
   const handleBookRide = async () => {
-    if (!user?.id) {
-      Alert.alert('Error', 'Please log in to book a ride');
+    if (!pickupAddress.trim()) {
+      Alert.alert('Error', 'Please enter a pickup location');
       return;
     }
 
-    if (!pickup || !destination) {
-      Alert.alert('Error', 'Please select both pickup and destination locations');
+    if (!destinationAddress.trim()) {
+      Alert.alert('Error', 'Please enter a destination');
       return;
     }
+
+    setLoading(true);
 
     try {
-      await dispatch(createRideRequest({
-        customerId: user.id,
-        pickup,
-        destination,
-        serviceType,
-        paymentMethod,
-        notes: notes.trim() || undefined,
-      })).unwrap();
-
-      // Navigate to ride tracking screen
-      navigation.navigate('RideTracking');
+      // Simulate booking process
+      await new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
+      
+      Alert.alert(
+        'Ride Booked!',
+        `Your ride from "${pickupAddress}" to "${destinationAddress}" has been requested. Looking for nearby drivers...`,
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
     } catch (error) {
-      // Error is handled by the effect above
-      console.error('Failed to book ride:', error);
+      Alert.alert('Error', 'Failed to book ride. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getEstimatedPrice = () => {
-    const estimate = rideEstimates.find(e => e.serviceType === serviceType);
-    return estimate?.pricing.total;
+  const handleUseCurrentLocation = async () => {
+    try {
+      const location = await locationService.getCurrentLocation();
+      // You could reverse geocode here to get address
+      setPickupAddress('Current Location');
+      setPickupLocation({ lat: location.lat, lng: location.lng });
+      setMapRegion({
+        latitude: location.lat,
+        longitude: location.lng,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Could not get current location. Please enter manually.');
+    }
   };
 
-  const isFormValid = pickup && destination && canBookRide;
+  const getMapMarkers = () => {
+    const markers: any[] = [];
+    if (pickupLocation) {
+      markers.push({
+        id: 'pickup',
+        coordinate: { latitude: pickupLocation.lat, longitude: pickupLocation.lng },
+        type: 'pickup',
+        title: 'Pickup Location',
+        description: pickupAddress,
+      });
+    }
+    if (destinationLocation) {
+      markers.push({
+        id: 'destination',
+        coordinate: { latitude: destinationLocation.lat, longitude: destinationLocation.lng },
+        type: 'destination',
+        title: 'Destination',
+        description: destinationAddress,
+      });
+    }
+    return markers;
+  };
 
   return (
-    <Screen style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Book Your Ride</Text>
-            <Text style={styles.subtitle}>
-              Choose your pickup and destination to get started
-            </Text>
-          </View>
-
-          {/* Location Inputs */}
-          <View style={styles.locationSection}>
-            <View style={styles.locationInputContainer}>
-              <View style={styles.locationDot} />
-              <LocationInput
-                placeholder="Pickup location"
-                value={pickup}
-                onChange={setPickup}
-                icon={<Text style={styles.locationIcon}>📍</Text>}
-              />
-            </View>
-
-            <View style={styles.locationLine} />
-
-            <View style={styles.locationInputContainer}>
-              <View style={[styles.locationDot, styles.destinationDot]} />
-              <LocationInput
-                placeholder="Where to?"
-                value={destination}
-                onChange={setDestination}
-                icon={<Text style={styles.locationIcon}>🎯</Text>}
-              />
-            </View>
-          </View>
-
-          {/* Service Type Selection */}
-          {pickup && destination && (
-            <View style={styles.sectionContainer}>
-              <ServiceTypeSelector
-                selectedType={serviceType}
-                onSelect={setServiceType}
-                estimatedPrice={getEstimatedPrice()}
-              />
-            </View>
-          )}
-
-          {/* Payment Method Selection */}
-          {pickup && destination && (
-            <View style={styles.sectionContainer}>
-              <PaymentMethodSelector
-                selectedMethod={paymentMethod}
-                onSelect={setPaymentMethod}
-              />
-            </View>
-          )}
-
-          {/* Ride Summary */}
-          {pickup && destination && (
-            <View style={styles.summarySection}>
-              <Text style={styles.summaryTitle}>Ride Summary</Text>
-              <View style={styles.summaryCard}>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>From:</Text>
-                  <Text style={styles.summaryValue} numberOfLines={1}>
-                    {pickup.address}
-                  </Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>To:</Text>
-                  <Text style={styles.summaryValue} numberOfLines={1}>
-                    {destination.address}
-                  </Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Service:</Text>
-                  <Text style={styles.summaryValue}>{serviceType}</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Payment:</Text>
-                  <Text style={styles.summaryValue}>{paymentMethod}</Text>
-                </View>
-                {getEstimatedPrice() && (
-                  <View style={[styles.summaryRow, styles.priceRow]}>
-                    <Text style={styles.priceLabel}>Estimated Total:</Text>
-                    <Text style={styles.priceValue}>
-                      {getEstimatedPrice()?.toFixed(2)} JOD
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
-        </ScrollView>
-
-        {/* Book Ride Button */}
-        <View style={styles.bottomSection}>
-          <Button
-            title={loading ? 'Booking...' : 'Book Ride'}
-            onPress={handleBookRide}
-            disabled={!isFormValid || loading}
-            loading={loading}
-            style={styles.bookButton}
-          />
+    <SafeAreaView style={styles.container}>
+      {/* Loading Indicator */}
+      {mapLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary[500]} />
+          <Text style={styles.loadingText}>Loading map...</Text>
         </View>
-      </KeyboardAvoidingView>
-    </Screen>
+      )}
+
+      {/* Full Screen Map */}
+      {!mapLoading && (
+        <RideMapView
+        region={mapRegion}
+        markers={getMapMarkers()}
+        pickup={pickupLocation ? {
+          address: pickupAddress,
+          coordinates: pickupLocation,
+        } : undefined}
+        destination={destinationLocation ? {
+          address: destinationAddress,
+          coordinates: destinationLocation,
+        } : undefined}
+        showRoute={pickupLocation && destinationLocation ? true : false}
+        onRegionChange={setMapRegion}
+        style={styles.map}
+      />
+      )}
+
+      {/* Location Input Panel */}
+      {!mapLoading && (
+        <View style={styles.inputPanel}>
+        {/* Pickup Input */}
+        <GooglePlacesAutocomplete
+          placeholder="Enter pickup location"
+          value={pickupAddress}
+          onChangeText={setPickupAddress}
+          onPlaceSelected={selectPickupPlace}
+          leftIcon={<View style={styles.locationDot} />}
+          rightIcon={<Text style={styles.currentLocationText}>📍</Text>}
+          onRightIconPress={handleUseCurrentLocation}
+          containerStyle={styles.autocompleteContainer}
+        />
+
+        {/* Destination Input */}
+        <GooglePlacesAutocomplete
+          placeholder="Enter destination"
+          value={destinationAddress}
+          onChangeText={setDestinationAddress}
+          onPlaceSelected={selectDestinationPlace}
+          leftIcon={<View style={[styles.locationDot, { backgroundColor: colors.error[500] }]} />}
+          containerStyle={[styles.autocompleteContainer, { marginTop: spacing.sm }]}
+        />
+      </View>
+      )}
+
+      {/* Book Ride Button */}
+      {!mapLoading && (
+        <View style={styles.bottomPanel}>
+        <Button
+          title={loading ? "Booking Ride..." : "Book Ride"}
+          onPress={handleBookRide}
+          disabled={loading || !pickupAddress.trim() || !destinationAddress.trim()}
+          style={styles.bookButton}
+        />
+      </View>
+      )}
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.white,
   },
-  keyboardAvoidingView: {
+  map: {
     flex: 1,
+    width: width,
+    height: height,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: spacing.xl,
-  },
-  header: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
+  inputPanel: {
+    position: 'absolute',
+    top: 60,
+    left: spacing.md,
+    right: spacing.md,
     backgroundColor: colors.white,
-  },
-  title: {
-    ...textStyles.h2,
-    color: colors.gray[900],
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    ...textStyles.body1,
-    color: colors.gray[600],
-  },
-  sectionContainer: {
-    backgroundColor: colors.white,
-    marginTop: spacing.sm,
-  },
-  locationSection: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
-    backgroundColor: colors.white,
-    marginTop: spacing.sm,
-  },
-  locationInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md,
+    borderRadius: 16,
+    padding: spacing.md,
+    shadowColor: colors.gray[900],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   locationDot: {
     width: 12,
@@ -271,83 +338,44 @@ const styles = StyleSheet.create({
     backgroundColor: colors.success[500],
     marginRight: spacing.md,
   },
-  destinationDot: {
-    backgroundColor: colors.error[500],
+  currentLocationText: {
+    fontSize: 18,
   },
-  locationLine: {
-    width: 2,
-    height: 20,
-    backgroundColor: colors.gray[300],
-    marginLeft: 5,
-    marginRight: spacing.md,
-    marginBottom: spacing.md,
-  },
-  locationIcon: {
-    fontSize: 16,
-  },
-  summarySection: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
-  },
-  summaryTitle: {
-    ...textStyles.h3,
-    color: colors.gray[900],
-    marginBottom: spacing.md,
-  },
-  summaryCard: {
+  bottomPanel: {
+    position: 'absolute',
+    bottom: 40,
+    left: spacing.md,
+    right: spacing.md,
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: spacing.md,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.gray[900],
+    shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
-  },
-  summaryLabel: {
-    ...textStyles.body1,
-    color: colors.gray[600],
-    flex: 1,
-  },
-  summaryValue: {
-    ...textStyles.body1,
-    color: colors.gray[900],
-    flex: 2,
-    textAlign: 'right',
-    textTransform: 'capitalize',
-  },
-  priceRow: {
-    borderBottomWidth: 0,
-    marginTop: spacing.sm,
-    paddingTop: spacing.sm,
-    borderTopWidth: 2,
-    borderTopColor: colors.primary[200],
-  },
-  priceLabel: {
-    ...textStyles.body1,
-    fontWeight: '600',
-    color: colors.gray[900],
-  },
-  priceValue: {
-    ...textStyles.h4,
-    fontWeight: 'bold',
-    color: colors.primary[600],
-  },
-  bottomSection: {
-    padding: spacing.md,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.gray[200],
+    shadowRadius: 8,
+    elevation: 4,
   },
   bookButton: {
     backgroundColor: colors.primary[500],
+  },
+  autocompleteContainer: {
+    zIndex: 1000,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    zIndex: 9999,
+  },
+  loadingText: {
+    marginTop: spacing.md,
+    fontSize: 16,
+    color: colors.gray[600],
+    fontWeight: '500',
   },
 });

@@ -110,11 +110,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
 
   const handleServicePress = (service: ServiceItem) => {
     if (service.route && navigation) {
-      // Navigate to enhanced ride booking screen
-      if (service.route === 'BookRide') {
-        navigation.navigate('EnhancedRideBooking');
-        return;
-      }
       navigation.navigate(service.route);
     } else {
       Alert.alert(

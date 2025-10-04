@@ -3,8 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { CustomerTabParamList } from './types';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { RideBookingScreen, RideTrackingScreen } from '../screens/ride';
-import EnhancedRideBookingScreen from '../screens/ride/EnhancedRideBookingScreen';
-import SimpleRideBookingScreen from '../screens/ride/SimpleRideBookingScreen';
 import EnhancedRideTrackingScreen from '../screens/ride/EnhancedRideTrackingScreen';
 import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import BecomeDriverScreen from '../screens/driver/BecomeDriverScreen';
@@ -46,13 +44,6 @@ export const CustomerNavigator: React.FC = () => {
       <Stack.Screen
         name="BookRide"
         component={RideBookingScreen}
-        options={{
-          title: 'Book a Ride',
-        }}
-      />
-      <Stack.Screen
-        name="EnhancedRideBooking"
-        component={SimpleRideBookingScreen}
         options={{
           title: 'Book Your Ride',
         }}
