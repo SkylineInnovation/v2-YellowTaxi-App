@@ -16,7 +16,6 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yellowtaxiapp",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "YellowTaxi needs your location to show nearby drivers and provide accurate ride services.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "YellowTaxi needs your location to track your ride and provide accurate pickup services.",
@@ -26,22 +25,19 @@
           "ElMessiri-Regular.ttf",
           "ElMessiri-SemiBold.ttf"
         ]
-      },
-      "googleServicesFile": "./ios/GoogleService-Info.plist"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F59E0B"
       },
-      "package": "com.yellowtaxiapp",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "FOREGROUND_SERVICE",
         "ACCESS_BACKGROUND_LOCATION"
       ],
-      "googleServicesFile": "./android/app/google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDyfbLegHVXSwjhSvKeC3aYjwhV5mOifqw"
