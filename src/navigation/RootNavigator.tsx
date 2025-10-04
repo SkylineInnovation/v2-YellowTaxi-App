@@ -33,7 +33,15 @@ export const RootNavigator: React.FC = () => {
       }
     };
 
-    initializeAuth();
+    // Set a timeout to ensure loading doesn't hang indefinitely
+    const timeoutId = setTimeout(() => {
+      console.log('Auth initialization timeout - proceeding anyway');
+      setIsLoading(false);
+    }, 3000);
+
+    initializeAuth().then(() => {
+      clearTimeout(timeoutId);
+    });
 
     // Listen for auth state changes
     const unsubscribe = phoneAuthService.onAuthStateChanged((user) => {
@@ -44,8 +52,11 @@ export const RootNavigator: React.FC = () => {
       }
     });
 
-    return unsubscribe;
-  }, [dispatch, isLoading]);
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
+  }, [dispatch]);
 
   if (isLoading) {
     return <SplashScreen />;
