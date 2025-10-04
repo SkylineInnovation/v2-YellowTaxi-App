@@ -17,6 +17,8 @@ import {
   limit as firestoreLimit,
   onSnapshot,
   writeBatch,
+  arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import {
   RideRequest,
@@ -171,9 +173,10 @@ class RideService {
       };
 
       // Create the ride order document
-      const orderRef = await firebaseFirestore
-        .collection(this.ORDERS_COLLECTION)
-        .add(rideOrder);
+      const orderRef = await addDoc(
+        collection(firebaseFirestore, this.ORDERS_COLLECTION),
+        rideOrder
+      );
 
       // Find and notify nearby drivers
       await this.findAndNotifyNearbyDrivers(
@@ -213,7 +216,7 @@ class RideService {
         return;
       }
 
-      const batch = firebaseFirestore.batch();
+      const batch = writeBatch(firebaseFirestore);
       const now = FieldValue.serverTimestamp();
       const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes to respond
 
@@ -234,9 +237,9 @@ class RideService {
           createdAt: now as any,
         };
 
-        const requestRef = firebaseFirestore
-          .collection(this.DRIVER_REQUESTS_COLLECTION)
-          .doc();
+        const requestRef = doc(
+          collection(firebaseFirestore, this.DRIVER_REQUESTS_COLLECTION)
+        );
         
         batch.set(requestRef, driverRequest);
 
@@ -264,17 +267,18 @@ class RideService {
     try {
       // In a production app, you would use geospatial queries
       // For now, we'll get all online drivers and filter by distance
-      const snapshot = await firebaseFirestore
-        .collection(this.DRIVERS_COLLECTION)
-        .where('isOnline', '==', true)
-        .where('isAvailable', '==', true)
-        .where('status', '==', 'online')
-        .get();
+      const q = query(
+        collection(firebaseFirestore, this.DRIVERS_COLLECTION),
+        where('isOnline', '==', true),
+        where('isAvailable', '==', true),
+        where('status', '==', 'online')
+      );
+      const snapshot = await getDocs(q);
 
       const nearbyDrivers: Driver[] = [];
       
-      snapshot.forEach((doc) => {
-        const driver = { id: doc.id, ...doc.data() } as Driver;
+      snapshot.forEach((docSnap) => {
+        const driver = { id: docSnap.id, ...docSnap.data() } as Driver;
         const distance = this.calculateDistance(location, driver.location);
         
         if (distance <= radiusKm) {
@@ -299,16 +303,14 @@ class RideService {
   // Get ride request by ID
   async getRideRequest(requestId: string): Promise<RideRequest | null> {
     try {
-      const doc = await firebaseFirestore
-        .collection(this.RIDE_REQUESTS_COLLECTION)
-        .doc(requestId)
-        .get();
+      const docRef = doc(firebaseFirestore, this.RIDE_REQUESTS_COLLECTION, requestId);
+      const docSnap = await getDoc(docRef);
 
-      if (!doc.exists) {
+      if (!docSnap.exists()) {
         return null;
       }
 
-      return { id: doc.id, ...doc.data() } as RideRequest;
+      return { id: docSnap.id, ...docSnap.data() } as RideRequest;
     } catch (error) {
       console.error('Error getting ride request:', error);
       throw error;
@@ -318,14 +320,12 @@ class RideService {
   // Cancel a ride request
   async cancelRideRequest(requestId: string, reason?: string): Promise<void> {
     try {
-      await firebaseFirestore
-        .collection(this.RIDE_REQUESTS_COLLECTION)
-        .doc(requestId)
-        .update({
-          status: 'cancelled',
-          updatedAt: FieldValue.serverTimestamp(),
-          cancellationReason: reason,
-        });
+      const docRef = doc(firebaseFirestore, this.RIDE_REQUESTS_COLLECTION, requestId);
+      await updateDoc(docRef, {
+        status: 'cancelled',
+        updatedAt: FieldValue.serverTimestamp(),
+        cancellationReason: reason,
+      });
 
       console.log('Ride request cancelled:', requestId);
     } catch (error) {
@@ -339,22 +339,25 @@ class RideService {
     customerId: string,
     callback: (requests: RideRequest[]) => void
   ): () => void {
-    const unsubscribe = firebaseFirestore
-      .collection(this.RIDE_REQUESTS_COLLECTION)
-      .where('customerId', '==', customerId)
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(
-        (snapshot) => {
-          const requests: RideRequest[] = [];
-          snapshot.forEach((doc) => {
-            requests.push({ id: doc.id, ...doc.data() } as RideRequest);
-          });
-          callback(requests);
-        },
-        (error) => {
-          console.error('Error subscribing to ride requests:', error);
-        }
-      );
+    const q = query(
+      collection(firebaseFirestore, this.RIDE_REQUESTS_COLLECTION),
+      where('customerId', '==', customerId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const requests: RideRequest[] = [];
+        snapshot.forEach((docSnap) => {
+          requests.push({ id: docSnap.id, ...docSnap.data() } as RideRequest);
+        });
+        callback(requests);
+      },
+      (error) => {
+        console.error('Error subscribing to ride requests:', error);
+      }
+    );
 
     return unsubscribe;
   }
@@ -364,22 +367,25 @@ class RideService {
     customerId: string,
     callback: (ride: RideOrder | null) => void
   ): () => void {
-    const unsubscribe = firebaseFirestore
-      .collection(this.ORDERS_COLLECTION)
-      .where('customerId', '==', customerId)
-      .where('status', 'in', ['searching', 'assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress'])
-      .onSnapshot(
-        (snapshot) => {
-          if (snapshot.empty) {
-            callback(null);
-            return;
-          }
+    const q = query(
+      collection(firebaseFirestore, this.ORDERS_COLLECTION),
+      where('customerId', '==', customerId),
+      where('status', 'in', ['searching', 'assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress'])
+    );
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        if (snapshot.empty) {
+          callback(null);
+          return;
+        }
 
-          const doc = snapshot.docs[0]; // Get the first active ride
-          const data = doc.data();
+        const docSnap = snapshot.docs[0]; // Get the first active ride
+        const data = docSnap.data();
           
           const order: RideOrder = {
-            id: doc.id,
+            id: docSnap.id,
             customerId: data.customerId,
             driverId: data.driverId,
             pickup: data.pickup,
@@ -412,17 +418,20 @@ class RideService {
     customerId: string,
     callback: (orders: RideOrder[]) => void
   ): () => void {
-    const unsubscribe = firebaseFirestore
-      .collection(this.ORDERS_COLLECTION)
-      .where('customerId', '==', customerId)
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(
-        (snapshot) => {
-          const orders: RideOrder[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            const order: RideOrder = {
-              id: doc.id,
+    const q = query(
+      collection(firebaseFirestore, this.ORDERS_COLLECTION),
+      where('customerId', '==', customerId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const orders: RideOrder[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const order: RideOrder = {
+            id: docSnap.id,
               customerId: data.customerId,
               driverId: data.driverId,
               pickup: data.pickup,
@@ -498,7 +507,7 @@ class RideService {
       const updateData: any = {
         status,
         updatedAt: now,
-        'timeline': FieldValue.arrayUnion({
+        'timeline': arrayUnion({
           status,
           timestamp: now,
           notes,
@@ -510,18 +519,13 @@ class RideService {
         updateData.completedAt = now;
       }
 
-      await firebaseFirestore
-        .collection(this.ORDERS_COLLECTION)
-        .doc(rideId)
-        .update(updateData);
+      const rideDocRef = doc(firebaseFirestore, this.ORDERS_COLLECTION, rideId);
+      await updateDoc(rideDocRef, updateData);
 
       // Get ride details for notifications
-      const rideDoc = await firebaseFirestore
-        .collection(this.ORDERS_COLLECTION)
-        .doc(rideId)
-        .get();
+      const rideDoc = await getDoc(rideDocRef);
 
-      if (!rideDoc.exists) {
+      if (!rideDoc.exists()) {
         throw new Error('Ride not found');
       }
 
