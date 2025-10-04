@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 
 import { Screen, Button, PhoneInput, Logo } from '../../components/ui';
 import { AuthStackParamList } from '../../navigation/types';
@@ -19,6 +20,7 @@ import { phoneAuthService } from '../../services/auth';
 import { colors, textStyles, spacing } from '../../theme';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { createTextStyle } from '../../utils/fonts';
+import { firebaseApp } from '../../config/firebase';
 
 type PhoneLoginScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -37,6 +39,7 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
   const [countryCode, setCountryCode] = useState('+962');
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
+  const recaptchaVerifier = useRef<FirebaseRecaptchaVerifierModal>(null);
 
   const handleCountryChange = (country: any) => {
     setCountryCode(country.dialCode);
@@ -66,6 +69,7 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
       const result = await dispatch(sendOTP({
         phoneNumber,
         countryCode,
+        recaptchaVerifier: recaptchaVerifier.current,
       })).unwrap();
 
       // Navigate to OTP verification screen
@@ -86,6 +90,11 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <Screen scrollable safeArea>
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={firebaseApp.options}
+        attemptInvisibleVerification={true}
+      />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
