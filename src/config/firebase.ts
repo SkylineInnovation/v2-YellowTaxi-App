@@ -1,10 +1,12 @@
 // Firebase configuration for Expo
 // This uses the Firebase JS SDK (v10) which is compatible with Expo
 
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { 
   getAuth, 
   Auth,
+  initializeAuth,
+  browserLocalPersistence,
   User,
   UserCredential,
   ConfirmationResult
@@ -16,6 +18,7 @@ import {
   DocumentSnapshot,
   QuerySnapshot
 } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase configuration
 // Configuration extracted from google-services.json
@@ -37,10 +40,15 @@ try {
   // Check if Firebase app is already initialized
   if (getApps().length === 0) {
     app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
+    
+    // Initialize Auth with AsyncStorage persistence for React Native
+    auth = initializeAuth(app, {
+      persistence: browserLocalPersistence,
+    });
+    
     firestore = getFirestore(app);
   } else {
-    app = getApp();
+    app = getApps()[0];
     auth = getAuth(app);
     firestore = getFirestore(app);
   }
