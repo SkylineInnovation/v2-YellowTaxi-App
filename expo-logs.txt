@@ -1,0 +1,7 @@
+env: load .env
+env: export GOOGLE_MAPS_API_KEY APP_ENV API_BASE_URL ENABLE_PUSH_NOTIFICATIONS ENABLE_REAL_TIME_TRACKING ENABLE_DRIVER_MODE
+Starting project at /Users/shadi/Documents/sourcecode/v2-YellowTaxi-App
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
