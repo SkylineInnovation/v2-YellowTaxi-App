@@ -34,23 +34,27 @@ import {
 // Firebase Auth implementation for Expo
 class FirebaseAuthService {
   private currentUser: User | null = null;
-  private recaptchaVerifier: RecaptchaVerifier | null = null;
 
-  async signInWithPhoneNumber(phoneNumber: string): Promise<ConfirmationResult> {
+  async signInWithPhoneNumber(
+    phoneNumber: string, 
+    recaptchaVerifier: any
+  ): Promise<ConfirmationResult> {
     try {
       if (!isFirebaseConfigured()) {
         throw new Error('Firebase is not properly configured');
       }
 
+      if (!recaptchaVerifier) {
+        throw new Error('Recaptcha verifier is required for phone authentication');
+      }
+
       console.log(`Sending OTP to ${phoneNumber}...`);
 
-      // Note: For Expo/React Native, we need to use a different approach for phone auth
-      // This will require expo-firebase-recaptcha or a backend implementation
-      // For now, we'll use the standard Firebase JS SDK approach
+      // Use Firebase JS SDK with expo-firebase-recaptcha
       const confirmationResult = await firebaseSignInWithPhoneNumber(
         firebaseAuth, 
         phoneNumber,
-        this.recaptchaVerifier as any // Will be handled by backend or Expo Firebase Recaptcha
+        recaptchaVerifier
       );
 
       console.log('OTP sent successfully');
@@ -156,10 +160,18 @@ export class PhoneAuthService {
     return PhoneAuthService.instance;
   }
 
-  async sendOTP(phoneNumber: string, dialCode: string = '+962'): Promise<PhoneAuthResponse> {
+  async sendOTP(
+    phoneNumber: string, 
+    dialCode: string = '+962',
+    recaptchaVerifier?: any
+  ): Promise<PhoneAuthResponse> {
     try {
       if (!isFirebaseConfigured()) {
         throw new Error('Firebase is not properly configured. Please check your Firebase setup.');
+      }
+
+      if (!recaptchaVerifier) {
+        throw new Error('Recaptcha verifier is required. Please ensure the recaptcha component is loaded.');
       }
 
       // Validate phone number first
@@ -172,8 +184,8 @@ export class PhoneAuthService {
 
       console.log('Sending OTP to:', formattedPhone);
 
-      // Send OTP using Firebase Auth
-      const confirmationResult = await auth.signInWithPhoneNumber(formattedPhone);
+      // Send OTP using Firebase Auth with recaptcha verifier
+      const confirmationResult = await auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier);
 
       return {
         success: true,
@@ -192,6 +204,8 @@ export class PhoneAuthService {
           errorMessage = 'Too many requests. Please try again later.';
         } else if (error.message.includes('auth/quota-exceeded')) {
           errorMessage = 'SMS quota exceeded. Please try again later.';
+        } else if (error.message.includes('auth/captcha')) {
+          errorMessage = 'Captcha verification failed. Please try again.';
         } else {
           errorMessage = error.message;
         }
