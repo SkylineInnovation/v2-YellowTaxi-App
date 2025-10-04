@@ -395,6 +395,12 @@ The YellowTaxi app now supports both English and Arabic languages with a profess
 - Firebase CLI requires proper account authentication and project selection before deployment
 - Index deployment can take several minutes depending on collection size
 - Security rules must be deployed alongside indexes to protect data access
+- Duplicate screens should be consolidated for better code maintainability and professional structure
+- react-native-maps requires both iOS and Android Google Maps API key configuration in app.json
+- MapView props must match exact property names (e.g., showsPointsOfInterest not showsPointsOfInterests)
+- Location permissions should be requested with user-friendly alerts explaining why access is needed
+- Map loading states improve UX by showing progress indicators during initialization
+- Expo Location provides cross-platform location services with proper permission handling
 
 ### Grab-Inspired Welcome Screen Redesign ✅
 - [x] Replace hero section with immersive Unsplash background header
