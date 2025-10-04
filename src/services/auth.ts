@@ -1,5 +1,5 @@
-// Firebase Auth Service for React Native
-// Real Firebase implementation using @react-native-firebase
+// Firebase Auth Service for Expo
+// Firebase JS SDK implementation
 
 import { User, PhoneAuthResponse, AuthResponse } from '../types/auth';
 import {
@@ -17,25 +17,48 @@ import {
   isValidPhoneForCountry,
   extractDialCode
 } from '../utils/phoneValidation';
+import { 
+  signInWithPhoneNumber as firebaseSignInWithPhoneNumber,
+  signOut as firebaseSignOut,
+  onAuthStateChanged as firebaseOnAuthStateChanged,
+  RecaptchaVerifier
+} from 'firebase/auth';
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  collection 
+} from 'firebase/firestore';
 
-// Firebase Auth implementation for React Native
+// Firebase Auth implementation for Expo
 class FirebaseAuthService {
   private currentUser: User | null = null;
 
-  async signInWithPhoneNumber(phoneNumber: string): Promise<ConfirmationResult> {
+  async signInWithPhoneNumber(
+    phoneNumber: string, 
+    recaptchaVerifier: any
+  ): Promise<ConfirmationResult> {
     try {
       if (!isFirebaseConfigured()) {
         throw new Error('Firebase is not properly configured');
       }
 
+      if (!recaptchaVerifier) {
+        throw new Error('Recaptcha verifier is required for phone authentication');
+      }
+
       console.log(`Sending OTP to ${phoneNumber}...`);
 
-      // Use React Native Firebase phone authentication
-      // Note: This automatically handles SMS sending without reCAPTCHA
-      const confirmationResult = await firebaseAuth.signInWithPhoneNumber(phoneNumber);
+      // Use Firebase JS SDK with expo-firebase-recaptcha
+      const confirmationResult = await firebaseSignInWithPhoneNumber(
+        firebaseAuth, 
+        phoneNumber,
+        recaptchaVerifier
+      );
 
       console.log('OTP sent successfully');
-      return confirmationResult;
+      return confirmationResult as ConfirmationResult;
     } catch (error) {
       console.error('Error sending OTP:', error);
       throw error;
@@ -44,7 +67,7 @@ class FirebaseAuthService {
 
   async signOut(): Promise<void> {
     try {
-      await firebaseAuth.signOut();
+      await firebaseSignOut(firebaseAuth);
       this.currentUser = null;
     } catch (error) {
       console.error('Sign out error:', error);
@@ -68,7 +91,7 @@ class FirebaseAuthService {
   }
 
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    return firebaseAuth.onAuthStateChanged((firebaseUser) => {
+    return firebaseOnAuthStateChanged(firebaseAuth, (firebaseUser) => {
       if (firebaseUser) {
         const user: User = {
           uid: firebaseUser.uid,
@@ -90,31 +113,42 @@ class FirebaseAuthService {
   // Create or update user document in Firestore
   async createOrUpdateUserDocument(user: User, additionalData?: any): Promise<void> {
     try {
-      const userDocRef = firebaseFirestore.collection('users').doc(user.uid);
+      const userDocRef = doc(firebaseFirestore, 'users', user.uid);
 
-      const userData = {
+      // Build user data object, filtering out undefined values
+      const userData: any = {
         uid: user.uid,
-        phoneNumber: user.phoneNumber,
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
         updatedAt: FieldValue.serverTimestamp(),
-        ...additionalData,
       };
 
-      // Check if user document exists
-      const userDoc = await userDocRef.get();
+      // Only add fields that are not undefined
+      if (user.phoneNumber) userData.phoneNumber = user.phoneNumber;
+      if (user.displayName) userData.displayName = user.displayName;
+      if (user.email) userData.email = user.email;
+      if (user.photoURL) userData.photoURL = user.photoURL;
 
-      if (!userDoc.exists) {
+      // Add additional data if provided
+      if (additionalData) {
+        Object.keys(additionalData).forEach(key => {
+          if (additionalData[key] !== undefined) {
+            userData[key] = additionalData[key];
+          }
+        });
+      }
+
+      // Check if user document exists
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
         // Create new user document
-        await userDocRef.set({
+        await setDoc(userDocRef, {
           ...userData,
           createdAt: FieldValue.serverTimestamp(),
         });
         console.log('User document created');
       } else {
         // Update existing user document
-        await userDocRef.update(userData);
+        await updateDoc(userDocRef, userData);
         console.log('User document updated');
       }
     } catch (error) {
@@ -137,10 +171,18 @@ export class PhoneAuthService {
     return PhoneAuthService.instance;
   }
 
-  async sendOTP(phoneNumber: string, dialCode: string = '+962'): Promise<PhoneAuthResponse> {
+  async sendOTP(
+    phoneNumber: string, 
+    dialCode: string = '+962',
+    recaptchaVerifier?: any
+  ): Promise<PhoneAuthResponse> {
     try {
       if (!isFirebaseConfigured()) {
         throw new Error('Firebase is not properly configured. Please check your Firebase setup.');
+      }
+
+      if (!recaptchaVerifier) {
+        throw new Error('Recaptcha verifier is required. Please ensure the recaptcha component is loaded.');
       }
 
       // Validate phone number first
@@ -153,8 +195,8 @@ export class PhoneAuthService {
 
       console.log('Sending OTP to:', formattedPhone);
 
-      // Send OTP using Firebase Auth
-      const confirmationResult = await auth.signInWithPhoneNumber(formattedPhone);
+      // Send OTP using Firebase Auth with recaptcha verifier
+      const confirmationResult = await auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier);
 
       return {
         success: true,
@@ -173,6 +215,8 @@ export class PhoneAuthService {
           errorMessage = 'Too many requests. Please try again later.';
         } else if (error.message.includes('auth/quota-exceeded')) {
           errorMessage = 'SMS quota exceeded. Please try again later.';
+        } else if (error.message.includes('auth/captcha')) {
+          errorMessage = 'Captcha verification failed. Please try again.';
         } else {
           errorMessage = error.message;
         }
@@ -270,8 +314,8 @@ export class PhoneAuthService {
   // Additional utility methods for user management
   async updateUserProfile(uid: string, profileData: Partial<User>): Promise<void> {
     try {
-      const userDocRef = firebaseFirestore.collection('users').doc(uid);
-      await userDocRef.update({
+      const userDocRef = doc(firebaseFirestore, 'users', uid);
+      await updateDoc(userDocRef, {
         ...profileData,
         updatedAt: FieldValue.serverTimestamp(),
       });
@@ -284,8 +328,8 @@ export class PhoneAuthService {
 
   async getUserProfile(uid: string): Promise<any> {
     try {
-      const userDocRef = firebaseFirestore.collection('users').doc(uid);
-      const userDoc = await userDocRef.get();
+      const userDocRef = doc(firebaseFirestore, 'users', uid);
+      const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
         return userDoc.data();

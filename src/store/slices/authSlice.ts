@@ -22,7 +22,11 @@ export const sendOTP = createAsyncThunk(
   'auth/sendOTP',
   async (phoneData: PhoneLoginForm, { rejectWithValue }) => {
     try {
-      const response = await phoneAuthService.sendOTP(phoneData.phoneNumber, phoneData.countryCode);
+      const response = await phoneAuthService.sendOTP(
+        phoneData.phoneNumber, 
+        phoneData.countryCode,
+        phoneData.recaptchaVerifier
+      );
 
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to send OTP');

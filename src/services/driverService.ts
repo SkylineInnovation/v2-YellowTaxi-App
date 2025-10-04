@@ -5,6 +5,22 @@ import {
   isFirebaseConfigured,
 } from '../config/firebase';
 import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  limit as firestoreLimit,
+  onSnapshot,
+  writeBatch,
+  arrayUnion,
+  increment,
+} from 'firebase/firestore';
+import {
   Driver,
   DriverRideRequest,
   RideOrder,
@@ -35,19 +51,19 @@ class DriverService {
       }
 
       const now = FieldValue.serverTimestamp();
-      const driverDoc = firebaseFirestore.collection(this.DRIVERS_COLLECTION).doc(driverData.id);
+      const driverDocRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverData.id!);
       
-      const existingDriver = await driverDoc.get();
+      const existingDriver = await getDoc(driverDocRef);
       
-      if (existingDriver.exists) {
+      if (existingDriver.exists()) {
         // Update existing driver
-        await driverDoc.update({
+        await updateDoc(driverDocRef, {
           ...driverData,
           updatedAt: now,
         });
       } else {
         // Create new driver
-        await driverDoc.set({
+        await setDoc(driverDocRef, {
           ...driverData,
           rating: driverData.rating || 5.0,
           totalRides: driverData.totalRides || 0,
@@ -69,16 +85,14 @@ class DriverService {
   // Get driver profile
   async getDriverProfile(driverId: string): Promise<Driver | null> {
     try {
-      const doc = await firebaseFirestore
-        .collection(this.DRIVERS_COLLECTION)
-        .doc(driverId)
-        .get();
+      const docRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
+      const docSnap = await getDoc(docRef);
 
-      if (!doc.exists) {
+      if (!docSnap.exists()) {
         return null;
       }
 
-      return { id: doc.id, ...doc.data() } as Driver;
+      return { id: docSnap.id, ...docSnap.data() } as Driver;
     } catch (error) {
       console.error('Error getting driver profile:', error);
       throw error;
@@ -88,15 +102,13 @@ class DriverService {
   // Update driver status (online/offline/busy/break)
   async updateDriverStatus(driverId: string, status: DriverStatus, isOnline: boolean = true): Promise<void> {
     try {
-      await firebaseFirestore
-        .collection(this.DRIVERS_COLLECTION)
-        .doc(driverId)
-        .update({
-          status,
-          isOnline,
-          isAvailable: status === 'online',
-          updatedAt: FieldValue.serverTimestamp(),
-        });
+      const driverDocRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
+      await updateDoc(driverDocRef, {
+        status,
+        isOnline,
+        isAvailable: status === 'online',
+        updatedAt: FieldValue.serverTimestamp(),
+      });
 
       console.log('Driver status updated:', driverId, status);
     } catch (error) {
@@ -111,13 +123,11 @@ class DriverService {
     location: { lat: number; lng: number; bearing?: number; speed?: number }
   ): Promise<void> {
     try {
-      await firebaseFirestore
-        .collection(this.DRIVERS_COLLECTION)
-        .doc(driverId)
-        .update({
-          location,
-          lastLocationUpdate: FieldValue.serverTimestamp(),
-        });
+      const driverDocRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
+      await updateDoc(driverDocRef, {
+        location,
+        lastLocationUpdate: FieldValue.serverTimestamp(),
+      });
     } catch (error) {
       console.error('Error updating driver location:', error);
       throw error;
@@ -129,19 +139,22 @@ class DriverService {
     driverId: string,
     callback: (requests: DriverRideRequest[]) => void
   ): () => void {
-    const unsubscribe = firebaseFirestore
-      .collection(this.DRIVER_REQUESTS_COLLECTION)
-      .where('driverId', '==', driverId)
-      .where('status', '==', 'pending')
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(
-        (snapshot) => {
-          const requests: DriverRideRequest[] = [];
-          snapshot.forEach((doc) => {
-            requests.push({ id: doc.id, ...doc.data() } as DriverRideRequest);
-          });
-          callback(requests);
-        },
+    const q = query(
+      collection(firebaseFirestore, this.DRIVER_REQUESTS_COLLECTION),
+      where('driverId', '==', driverId),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const requests: DriverRideRequest[] = [];
+        snapshot.forEach((docSnap) => {
+          requests.push({ id: docSnap.id, ...docSnap.data() } as DriverRideRequest);
+        });
+        callback(requests);
+      },
         (error) => {
           console.error('Error subscribing to driver ride requests:', error);
         }
@@ -153,13 +166,11 @@ class DriverService {
   // Accept a ride request
   async acceptRideRequest(requestId: string, driverId: string): Promise<void> {
     try {
-      const batch = firebaseFirestore.batch();
+      const batch = writeBatch(firebaseFirestore);
       const now = FieldValue.serverTimestamp();
 
       // Update the driver ride request
-      const requestRef = firebaseFirestore
-        .collection(this.DRIVER_REQUESTS_COLLECTION)
-        .doc(requestId);
+      const requestRef = doc(firebaseFirestore, this.DRIVER_REQUESTS_COLLECTION, requestId);
       
       batch.update(requestRef, {
         status: 'accepted',
@@ -167,25 +178,21 @@ class DriverService {
       });
 
       // Get the request data to update the main ride order
-      const requestDoc = await requestRef.get();
-      if (!requestDoc.exists) {
+      const requestDoc = await getDoc(requestRef);
+      if (!requestDoc.exists()) {
         throw new Error('Ride request not found');
       }
 
       const requestData = requestDoc.data() as DriverRideRequest;
 
       // Update the main ride order with driver assignment
-      const orderRef = firebaseFirestore
-        .collection(this.ORDERS_COLLECTION)
-        .doc(requestData.rideId);
+      const orderRef = doc(firebaseFirestore, this.ORDERS_COLLECTION, requestData.rideId);
 
       // Get driver details
-      const driverDoc = await firebaseFirestore
-        .collection(this.DRIVERS_COLLECTION)
-        .doc(driverId)
-        .get();
+      const driverDocRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
+      const driverDoc = await getDoc(driverDocRef);
 
-      if (!driverDoc.exists) {
+      if (!driverDoc.exists()) {
         throw new Error('Driver not found');
       }
 
@@ -203,7 +210,7 @@ class DriverService {
           location: driverData.location,
         },
         status: 'assigned',
-        'timeline': FieldValue.arrayUnion({
+        'timeline': arrayUnion({
           status: 'assigned',
           timestamp: now,
           notes: `Driver ${driverData.name} assigned`,
@@ -212,9 +219,7 @@ class DriverService {
       });
 
       // Update driver status to busy
-      const driverRef = firebaseFirestore
-        .collection(this.DRIVERS_COLLECTION)
-        .doc(driverId);
+      const driverRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
       
       batch.update(driverRef, {
         status: 'busy',
@@ -223,15 +228,16 @@ class DriverService {
       });
 
       // Decline all other pending requests for this ride
-      const otherRequestsSnapshot = await firebaseFirestore
-        .collection(this.DRIVER_REQUESTS_COLLECTION)
-        .where('rideId', '==', requestData.rideId)
-        .where('status', '==', 'pending')
-        .get();
+      const otherRequestsQuery = query(
+        collection(firebaseFirestore, this.DRIVER_REQUESTS_COLLECTION),
+        where('rideId', '==', requestData.rideId),
+        where('status', '==', 'pending')
+      );
+      const otherRequestsSnapshot = await getDocs(otherRequestsQuery);
 
-      otherRequestsSnapshot.forEach((doc) => {
-        if (doc.id !== requestId) {
-          batch.update(doc.ref, {
+      otherRequestsSnapshot.forEach((docSnap) => {
+        if (docSnap.id !== requestId) {
+          batch.update(docSnap.ref, {
             status: 'declined',
             respondedAt: now,
           });
@@ -249,14 +255,12 @@ class DriverService {
   // Decline a ride request
   async declineRideRequest(requestId: string, reason?: string): Promise<void> {
     try {
-      await firebaseFirestore
-        .collection(this.DRIVER_REQUESTS_COLLECTION)
-        .doc(requestId)
-        .update({
-          status: 'declined',
-          respondedAt: FieldValue.serverTimestamp(),
-          declineReason: reason,
-        });
+      const requestRef = doc(firebaseFirestore, this.DRIVER_REQUESTS_COLLECTION, requestId);
+      await updateDoc(requestRef, {
+        status: 'declined',
+        respondedAt: FieldValue.serverTimestamp(),
+        declineReason: reason,
+      });
 
       console.log('Ride request declined:', requestId);
     } catch (error) {
@@ -274,16 +278,16 @@ class DriverService {
     notes?: string
   ): Promise<void> {
     try {
-      const batch = firebaseFirestore.batch();
+      const batch = writeBatch(firebaseFirestore);
       const now = FieldValue.serverTimestamp();
 
       // Update the ride order
-      const orderRef = firebaseFirestore.collection(this.ORDERS_COLLECTION).doc(rideId);
+      const orderRef = doc(firebaseFirestore, this.ORDERS_COLLECTION, rideId);
       
       const updateData: any = {
         status,
         updatedAt: now,
-        'timeline': FieldValue.arrayUnion({
+        'timeline': arrayUnion({
           status,
           timestamp: now,
           notes,
@@ -299,9 +303,7 @@ class DriverService {
 
       // Update driver location if provided
       if (location) {
-        const driverRef = firebaseFirestore
-          .collection(this.DRIVERS_COLLECTION)
-          .doc(driverId);
+        const driverRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
         
         batch.update(driverRef, {
           location,
@@ -311,9 +313,7 @@ class DriverService {
 
       // If ride is completed or cancelled, make driver available again
       if (status === 'completed' || status === 'cancelled') {
-        const driverRef = firebaseFirestore
-          .collection(this.DRIVERS_COLLECTION)
-          .doc(driverId);
+        const driverRef = doc(firebaseFirestore, this.DRIVERS_COLLECTION, driverId);
         
         batch.update(driverRef, {
           status: 'online',
@@ -324,7 +324,7 @@ class DriverService {
         // Update driver's total rides count if completed
         if (status === 'completed') {
           batch.update(driverRef, {
-            totalRides: FieldValue.increment(1),
+            totalRides: increment(1),
           });
         }
       }
@@ -340,23 +340,24 @@ class DriverService {
   // Get driver's current ride
   async getDriverCurrentRide(driverId: string): Promise<RideOrder | null> {
     try {
-      const snapshot = await firebaseFirestore
-        .collection(this.ORDERS_COLLECTION)
-        .where('driverId', '==', driverId)
-        .where('status', 'in', ['assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress'])
-        .limit(1)
-        .get();
+      const q = query(
+        collection(firebaseFirestore, this.ORDERS_COLLECTION),
+        where('driverId', '==', driverId),
+        where('status', 'in', ['assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress']),
+        firestoreLimit(1)
+      );
+      const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
         return null;
       }
 
-      const doc = snapshot.docs[0];
-      const data = doc.data();
+      const docSnap = snapshot.docs[0];
+      const data = docSnap.data();
 
       // Transform Firestore document to RideOrder format
       const order: RideOrder = {
-        id: doc.id,
+        id: docSnap.id,
         customerId: data.customer?.id || data.customerId,
         driverId: data.driverId,
         pickup: {
@@ -399,23 +400,26 @@ class DriverService {
     driverId: string,
     callback: (ride: RideOrder | null) => void
   ): () => void {
-    const unsubscribe = firebaseFirestore
-      .collection(this.ORDERS_COLLECTION)
-      .where('driverId', '==', driverId)
-      .where('status', 'in', ['assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress'])
-      .onSnapshot(
-        (snapshot) => {
-          if (snapshot.empty) {
-            callback(null);
-            return;
-          }
+    const q = query(
+      collection(firebaseFirestore, this.ORDERS_COLLECTION),
+      where('driverId', '==', driverId),
+      where('status', 'in', ['assigned', 'driver_arriving', 'driver_arrived', 'picked_up', 'in_progress'])
+    );
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        if (snapshot.empty) {
+          callback(null);
+          return;
+        }
 
-          const doc = snapshot.docs[0];
-          const data = doc.data();
+        const docSnap = snapshot.docs[0];
+        const data = docSnap.data();
 
           // Transform Firestore document to RideOrder format
           const order: RideOrder = {
-            id: doc.id,
+            id: docSnap.id,
             customerId: data.customer?.id || data.customerId,
             driverId: data.driverId,
             pickup: {
@@ -459,21 +463,22 @@ class DriverService {
   // Get driver's ride history
   async getDriverRideHistory(driverId: string, limit: number = 20): Promise<RideOrder[]> {
     try {
-      const snapshot = await firebaseFirestore
-        .collection(this.ORDERS_COLLECTION)
-        .where('driverId', '==', driverId)
-        .where('status', 'in', ['completed', 'cancelled'])
-        .orderBy('completedAt', 'desc')
-        .limit(limit)
-        .get();
+      const q = query(
+        collection(firebaseFirestore, this.ORDERS_COLLECTION),
+        where('driverId', '==', driverId),
+        where('status', 'in', ['completed', 'cancelled']),
+        orderBy('completedAt', 'desc'),
+        firestoreLimit(limit)
+      );
+      const snapshot = await getDocs(q);
 
       const orders: RideOrder[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
         
         // Transform Firestore document to RideOrder format
         const order: RideOrder = {
-          id: doc.id,
+          id: docSnap.id,
           customerId: data.customer?.id || data.customerId,
           driverId: data.driverId,
           pickup: {
@@ -528,25 +533,29 @@ class DriverService {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
       // Get completed rides for different periods
+      const todayQuery = query(
+        collection(firebaseFirestore, this.ORDERS_COLLECTION),
+        where('driverId', '==', driverId),
+        where('status', '==', 'completed'),
+        where('completedAt', '>=', startOfDay)
+      );
+      const weekQuery = query(
+        collection(firebaseFirestore, this.ORDERS_COLLECTION),
+        where('driverId', '==', driverId),
+        where('status', '==', 'completed'),
+        where('completedAt', '>=', startOfWeek)
+      );
+      const monthQuery = query(
+        collection(firebaseFirestore, this.ORDERS_COLLECTION),
+        where('driverId', '==', driverId),
+        where('status', '==', 'completed'),
+        where('completedAt', '>=', startOfMonth)
+      );
+      
       const [todaySnapshot, weekSnapshot, monthSnapshot] = await Promise.all([
-        firebaseFirestore
-          .collection(this.ORDERS_COLLECTION)
-          .where('driverId', '==', driverId)
-          .where('status', '==', 'completed')
-          .where('completedAt', '>=', startOfDay)
-          .get(),
-        firebaseFirestore
-          .collection(this.ORDERS_COLLECTION)
-          .where('driverId', '==', driverId)
-          .where('status', '==', 'completed')
-          .where('completedAt', '>=', startOfWeek)
-          .get(),
-        firebaseFirestore
-          .collection(this.ORDERS_COLLECTION)
-          .where('driverId', '==', driverId)
-          .where('status', '==', 'completed')
-          .where('completedAt', '>=', startOfMonth)
-          .get(),
+        getDocs(todayQuery),
+        getDocs(weekQuery),
+        getDocs(monthQuery),
       ]);
 
       const calculateEarnings = (snapshot: any) => {

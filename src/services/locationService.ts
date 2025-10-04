@@ -1,7 +1,8 @@
 // Location service for Google Maps integration and real-time tracking
-import Geolocation from 'react-native-geolocation-service';
-import { PermissionsAndroid, Platform, Alert } from 'react-native';
+import * as ExpoLocation from 'expo-location';
+import { Platform, Alert } from 'react-native';
 import { firebaseFirestore, FieldValue } from '../config/firebase';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { Location, LocationUpdate, MapRegion } from '../types/ride';
 
 export interface GooglePlacesResult {
@@ -34,7 +35,7 @@ export interface GooglePlaceDetails {
 
 class LocationService {
   private static instance: LocationService;
-  private watchId: number | null = null;
+  private watchId: ExpoLocation.LocationSubscription | null = null;
   private googleApiKey: string = 'AIzaSyDyfbLegHVXSwjhSvKeC3aYjwhV5mOifqw'; // Google Places API key
   private locationUpdateCallbacks: ((location: LocationUpdate) => void)[] = [];
 
@@ -48,13 +49,8 @@ class LocationService {
   // Check if location permissions are already granted
   async hasLocationPermission(): Promise<boolean> {
     try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-        );
-        return granted;
-      }
-      return true; // iOS permissions are handled in Info.plist
+      const { status } = await ExpoLocation.getForegroundPermissionsAsync();
+      return status === 'granted';
     } catch (error) {
       console.error('Error checking location permission:', error);
       return false;
@@ -70,20 +66,8 @@ class LocationService {
         return true;
       }
 
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'YellowTaxi Location Permission',
-            message: 'YellowTaxi needs access to your location to provide ride services and find nearby drivers.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      }
-      return true; // iOS permissions are handled in Info.plist
+      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+      return status === 'granted';
     } catch (error) {
       console.error('Error requesting location permission:', error);
       return false;
@@ -99,36 +83,15 @@ class LocationService {
         throw new Error('Location permission not granted');
       }
 
-      return new Promise((resolve, reject) => {
-        Geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              bearing: position.coords.heading || undefined,
-            });
-          },
-          (error) => {
-            console.error('Error getting current location:', error);
-            // Provide a fallback location (Amman, Jordan) for development
-            if (__DEV__) {
-              console.warn('Using fallback location for development');
-              resolve({
-                lat: 31.9454,
-                lng: 35.9284,
-                bearing: undefined,
-              });
-            } else {
-              reject(error);
-            }
-          },
-          {
-            enableHighAccuracy: false, // Less aggressive for stability
-            timeout: 10000, // Shorter timeout
-            maximumAge: 30000, // Allow cached location
-          }
-        );
+      const position = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.Balanced,
       });
+      
+      return {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        bearing: position.coords.heading || undefined,
+      };
     } catch (error) {
       console.error('getCurrentLocation failed:', error);
       // Provide fallback for development
@@ -156,38 +119,34 @@ class LocationService {
         throw new Error('Location permission denied');
       }
 
-      this.watchId = Geolocation.watchPosition(
-      (position) => {
-        const locationUpdate: LocationUpdate = {
-          userId,
-          userType,
-          location: {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            bearing: position.coords.heading || undefined,
-            speed: position.coords.speed || undefined,
-            accuracy: position.coords.accuracy,
-          },
-          timestamp: FieldValue.serverTimestamp() as any,
-          rideId,
-        };
+      this.watchId = await ExpoLocation.watchPositionAsync(
+        {
+          accuracy: ExpoLocation.Accuracy.High,
+          distanceInterval: 10, // Update every 10 meters
+          timeInterval: 5000, // Update every 5 seconds
+        },
+        (position: ExpoLocation.LocationObject) => {
+          const locationUpdate: LocationUpdate = {
+            userId,
+            userType,
+            location: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              bearing: position.coords.heading || undefined,
+              speed: position.coords.speed || undefined,
+              accuracy: position.coords.accuracy || undefined,
+            },
+            timestamp: FieldValue.serverTimestamp() as any,
+            rideId,
+          };
 
-        // Update location in Firestore
-        this.updateLocationInFirestore(locationUpdate);
+          // Update location in Firestore
+          this.updateLocationInFirestore(locationUpdate);
 
-        // Notify callbacks
-        this.locationUpdateCallbacks.forEach(callback => callback(locationUpdate));
-      },
-      (error) => {
-        console.error('Location tracking error:', error);
-      },
-      {
-        enableHighAccuracy: true,
-        distanceFilter: 10, // Update every 10 meters
-        interval: 5000, // Update every 5 seconds
-        fastestInterval: 2000,
-      }
-    );
+          // Notify callbacks
+          this.locationUpdateCallbacks.forEach(callback => callback(locationUpdate));
+        }
+      );
     } catch (error) {
       console.error('Failed to start location tracking:', error);
       throw error;
@@ -197,7 +156,7 @@ class LocationService {
   // Stop location tracking
   stopLocationTracking(): void {
     if (this.watchId !== null) {
-      Geolocation.clearWatch(this.watchId);
+      this.watchId.remove();
       this.watchId = null;
     }
   }
@@ -205,18 +164,18 @@ class LocationService {
   // Update location in Firestore
   private async updateLocationInFirestore(locationUpdate: LocationUpdate): Promise<void> {
     try {
-      await firebaseFirestore
-        .collection('location_updates')
-        .add(locationUpdate);
+      await addDoc(
+        collection(firebaseFirestore, 'location_updates'),
+        locationUpdate
+      );
 
       // Also update user's current location
-      await firebaseFirestore
-        .collection(locationUpdate.userType === 'driver' ? 'drivers' : 'users')
-        .doc(locationUpdate.userId)
-        .update({
-          location: locationUpdate.location,
-          lastLocationUpdate: locationUpdate.timestamp,
-        });
+      const userCollection = locationUpdate.userType === 'driver' ? 'drivers' : 'users';
+      const userDocRef = doc(firebaseFirestore, userCollection, locationUpdate.userId);
+      await updateDoc(userDocRef, {
+        location: locationUpdate.location,
+        lastLocationUpdate: locationUpdate.timestamp,
+      });
     } catch (error) {
       console.error('Error updating location in Firestore:', error);
     }

@@ -95,6 +95,7 @@ export interface AuthState {
 export interface PhoneLoginForm {
   phoneNumber: string;
   countryCode: string;
+  recaptchaVerifier?: any;
 }
 
 export interface OTPVerificationForm {
