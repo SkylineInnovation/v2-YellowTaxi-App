@@ -1,4 +1,79 @@
 {
-  "name": "yellowtaxiapp",
-  "displayName": "yellowtaxiapp"
+  "expo": {
+    "name": "YellowTaxi",
+    "slug": "yellowtaxiapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F59E0B"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yellowtaxiapp",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "YellowTaxi needs your location to show nearby drivers and provide accurate ride services.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "YellowTaxi needs your location to track your ride and provide accurate pickup services.",
+        "UIAppFonts": [
+          "ElMessiri-Bold.ttf",
+          "ElMessiri-Medium.ttf",
+          "ElMessiri-Regular.ttf",
+          "ElMessiri-SemiBold.ttf"
+        ]
+      },
+      "googleServicesFile": "./ios/GoogleService-Info.plist"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F59E0B"
+      },
+      "package": "com.yellowtaxiapp",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
+      "googleServicesFile": "./android/app/google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-location",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
+  }
 }
